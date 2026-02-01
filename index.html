@@ -213,6 +213,32 @@
             box-shadow: 0 4px 8px rgba(183, 28, 28, 0.2);
         }
         
+        /* 错误卡片样式 */
+        .error-card {
+            background: #fff8f8;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            border: 2px dashed #d32f2f;
+            margin-bottom: 20px;
+        }
+        
+        .error-card i {
+            font-size: 3rem;
+            color: #d32f2f;
+            margin-bottom: 15px;
+        }
+        
+        .error-card h3 {
+            color: #d32f2f;
+            margin-bottom: 10px;
+        }
+        
+        .error-card p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
         /* 微信群区域 */
         .wechat-group {
             background: linear-gradient(135deg, #f9f9f9 0%, #fff 100%);
@@ -234,8 +260,8 @@
         
         .qrcode-container {
             margin: 20px auto;
-            width: 200px;
-            height: 200px;
+            width: 220px;
+            height: 220px;
             background-color: #f5f5f5;
             border-radius: 10px;
             display: flex;
@@ -243,6 +269,27 @@
             justify-content: center;
             color: #999;
             border: 1px solid #eee;
+            position: relative;
+        }
+        
+        .qrcode-placeholder {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .qrcode-error {
+            padding: 20px;
+            color: #d32f2f;
+        }
+        
+        .qrcode-expire {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #666;
+            background-color: #fff8e1;
+            padding: 8px 12px;
+            border-radius: 6px;
+            display: inline-block;
         }
         
         .wechat-note {
@@ -291,6 +338,11 @@
             .section-title {
                 font-size: 1.4rem;
             }
+            
+            .qrcode-container {
+                width: 200px;
+                height: 200px;
+            }
         }
         
         /* 加载状态 */
@@ -314,6 +366,29 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        
+        /* 时间线样式 */
+        .timeline-item {
+            padding: 12px 0;
+            border-bottom: 1px dashed #eee;
+            display: flex;
+            align-items: center;
+        }
+        
+        .timeline-date {
+            background-color: #d32f2f;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            margin-right: 15px;
+            font-size: 0.9rem;
+            min-width: 80px;
+            text-align: center;
+        }
+        
+        .timeline-event {
+            flex: 1;
+        }
     </style>
 </head>
 <body>
@@ -333,16 +408,19 @@
         
         // 页面数据
         let pageData = null;
+        let hasError = false;
         
         // 初始化页面
         document.addEventListener('DOMContentLoaded', async function() {
             try {
                 await loadPageData();
-                renderPage();
-                initEventListeners();
+                if (!hasError) {
+                    renderPage();
+                    initEventListeners();
+                }
             } catch (error) {
                 console.error('页面初始化失败:', error);
-                showError('加载失败，请刷新页面重试');
+                showGlobalError('加载失败，请刷新页面重试');
             }
         });
         
@@ -354,71 +432,28 @@
                     throw new Error(`HTTP ${response.status}`);
                 }
                 pageData = await response.json();
+                
+                // 验证必要字段是否存在
+                if (!pageData || !pageData.siteTitle) {
+                    throw new Error('数据格式错误');
+                }
+                
+                // 确保二维码过期时间字段存在（如果后端还没添加，前端提供默认值）
+                if (!pageData.qrCodeExpire) {
+                    pageData.qrCodeExpire = "2026-02-18"; // 默认到元宵节
+                }
+                
             } catch (error) {
                 console.error('加载数据失败:', error);
-                // 使用默认数据
-                pageData = getDefaultData();
+                hasError = true;
+                showGlobalError('无法加载活动数据，请检查网络连接后刷新页面重试。');
             }
-        }
-        
-        // 获取默认数据
-        function getDefaultData() {
-            return {
-                siteTitle: "马年迎春",
-                siteSubtitle: "2026甲午马年 · 各大平台春节活动一站式导航",
-                yearBadge: "2026 春节活动专区",
-                announcement: {
-                    title: "重要提示",
-                    content: "本页面汇总了2026年马年春节各大主流平台的官方活动，所有链接均为官方活动页面，请放心访问。为确保活动参与顺利，建议及时保存活动链接并关注我们的微信群获取最新信息。"
-                },
-                qrCodeUrl: "",
-                wechatNote: "提示：如二维码失效，请添加客服微信号：chunjie2026 备注'马年活动'邀请入群",
-                activities: [
-                    {
-                        id: "alipay",
-                        platform: "支付宝",
-                        icon: "fab fa-alipay",
-                        activityTitle: "集五福·马上有福",
-                        activityDesc: "2026年支付宝集五福活动全新升级，除了传统的AR扫福，新增马年专属福卡，最高可得666元红包。",
-                        enabled: true
-                    },
-                    {
-                        id: "wechat",
-                        platform: "微信",
-                        icon: "fab fa-weixin",
-                        activityTitle: "马上有红包·视频号春节直播",
-                        activityDesc: "微信视频号春节特别直播，红包封面免费领，直播期间红包雨不停，还可参与马年限定表情包活动。",
-                        enabled: true
-                    },
-                    {
-                        id: "taobao",
-                        platform: "淘宝",
-                        icon: "fas fa-shopping-cart",
-                        activityTitle: "年货节·马上过年",
-                        activityDesc: "淘宝年货节马年特别版，百亿补贴再加码，除夕前每晚8点抢红包，还有马年限定商品专享优惠。",
-                        enabled: true
-                    },
-                    {
-                        id: "douyin",
-                        platform: "抖音",
-                        icon: "fab fa-tiktok",
-                        activityTitle: "新春放映厅·马上有戏",
-                        activityDesc: "抖音春节放映厅活动，看视频抽红包，集卡分5亿，还有马年特效道具和拜年模板免费使用。",
-                        enabled: true
-                    }
-                ],
-                activityTimeline: [
-                    { date: "1月20日", event: "支付宝集五福活动开始" },
-                    { date: "1月25日", event: "抖音春节放映厅上线" },
-                    { date: "1月28日", event: "微信红包封面免费领取开始" },
-                    { date: "2月1日", event: "淘宝年货节高潮期" },
-                    { date: "2月4日", event: "除夕夜各大平台红包雨" }
-                ]
-            };
         }
         
         // 渲染页面
         function renderPage() {
+            if (!pageData) return;
+            
             const app = document.getElementById('app');
             
             app.innerHTML = `
@@ -436,10 +471,12 @@
                 
                 <div class="container">
                     <!-- 公告区域 -->
+                    ${pageData.announcement ? `
                     <div class="announcement">
                         <h3><i class="fas fa-bullhorn"></i> ${pageData.announcement.title}</h3>
                         <p>${pageData.announcement.content}</p>
                     </div>
+                    ` : ''}
                     
                     <!-- 热门活动区域 -->
                     <h2 class="section-title">
@@ -463,14 +500,24 @@
                             </div>
                         </div>
                         
+                        <!-- 二维码过期时间显示 -->
+                        ${pageData.qrCodeExpire ? `
+                        <div class="qrcode-expire">
+                            <i class="fas fa-clock"></i> 二维码有效期至：${formatDate(pageData.qrCodeExpire)}
+                        </div>
+                        ` : ''}
+                        
                         <p><strong>进群福利：</strong>每日活动提醒 + 独家攻略 + 问题解答 + 活动互助</p>
                         
+                        ${pageData.wechatNote ? `
                         <div class="wechat-note">
                             <p><i class="fas fa-info-circle"></i> ${pageData.wechatNote}</p>
                         </div>
+                        ` : ''}
                     </div>
                     
                     <!-- 活动时间线 -->
+                    ${pageData.activityTimeline && pageData.activityTimeline.length > 0 ? `
                     <h2 class="section-title">
                         <i class="fas fa-calendar-alt"></i> 活动时间表
                     </h2>
@@ -480,6 +527,7 @@
                             <!-- 时间线将通过JavaScript动态生成 -->
                         </ul>
                     </div>
+                    ` : ''}
                 </div>
                 
                 <footer>
@@ -498,7 +546,9 @@
             renderActivities();
             
             // 渲染时间线
-            renderTimeline();
+            if (pageData.activityTimeline && pageData.activityTimeline.length > 0) {
+                renderTimeline();
+            }
             
             // 加载二维码
             loadQRCode();
@@ -507,12 +557,20 @@
         // 渲染活动卡片
         function renderActivities() {
             const container = document.getElementById('activities-container');
-            if (!container) return;
+            if (!container || !pageData.activities) return;
             
             const enabledActivities = pageData.activities.filter(activity => activity.enabled);
             
             if (enabledActivities.length === 0) {
-                container.innerHTML = '<div class="error-message">暂无活动数据</div>';
+                // 显示错误卡片
+                container.innerHTML = `
+                    <div class="error-card">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>活动数据加载失败</h3>
+                        <p>暂时无法加载活动信息，请稍后刷新页面重试。</p>
+                        <button class="btn" onclick="window.location.reload()">刷新页面</button>
+                    </div>
+                `;
                 return;
             }
             
@@ -520,7 +578,7 @@
                 <div class="platform-card" data-activity-id="${activity.id}">
                     <div class="platform-header">
                         <div class="platform-icon">
-                            <i class="${activity.icon}"></i>
+                            <i class="${activity.icon || 'fas fa-question-circle'}"></i>
                         </div>
                         <div class="platform-name">${activity.platform}</div>
                     </div>
@@ -539,9 +597,9 @@
             if (!container || !pageData.activityTimeline) return;
             
             container.innerHTML = pageData.activityTimeline.map(item => `
-                <li style="padding: 10px 0; border-bottom: 1px dashed #eee; display: flex; align-items: center;">
-                    <span style="background-color: #d32f2f; color: white; padding: 5px 10px; border-radius: 4px; margin-right: 15px; font-size: 0.9rem;">${item.date}</span>
-                    <span>${item.event}</span>
+                <li class="timeline-item">
+                    <span class="timeline-date">${item.date}</span>
+                    <span class="timeline-event">${item.event}</span>
                 </li>
             `).join('');
         }
@@ -549,12 +607,59 @@
         // 加载二维码
         function loadQRCode() {
             const container = document.getElementById('qrcode-container');
-            if (!container || !pageData.qrCodeUrl) return;
+            if (!container) return;
             
-            if (pageData.qrCodeUrl.trim()) {
+            // 检查是否有二维码URL
+            if (!pageData.qrCodeUrl || pageData.qrCodeUrl.trim() === '') {
+                container.innerHTML = `
+                    <div class="qrcode-error">
+                        <i class="fas fa-exclamation-circle" style="font-size: 2.5rem; margin-bottom: 10px;"></i>
+                        <p>二维码暂未设置</p>
+                        <p style="font-size: 0.9rem; margin-top: 10px;">请联系管理员添加微信群二维码</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // 尝试加载二维码图片
+            const img = new Image();
+            img.onload = function() {
                 container.innerHTML = `
                     <img src="${pageData.qrCodeUrl}" alt="微信群二维码" style="width: 100%; height: 100%; object-fit: cover; border-radius: 10px;">
                 `;
+            };
+            
+            img.onerror = function() {
+                container.innerHTML = `
+                    <div class="qrcode-error">
+                        <i class="fas fa-exclamation-circle" style="font-size: 2.5rem; margin-bottom: 10px;"></i>
+                        <p>二维码加载失败</p>
+                        <p style="font-size: 0.9rem; margin-top: 10px;">请检查二维码链接是否正确，或联系管理员更新</p>
+                        <button class="btn" onclick="window.location.reload()" style="margin-top: 15px; width: auto; padding: 8px 16px;">刷新重试</button>
+                    </div>
+                `;
+            };
+            
+            // 设置超时
+            setTimeout(() => {
+                if (!img.complete) {
+                    img.onerror();
+                }
+            }, 5000);
+            
+            img.src = pageData.qrCodeUrl;
+        }
+        
+        // 格式化日期
+        function formatDate(dateString) {
+            try {
+                const date = new Date(dateString);
+                const year = date.getFullYear();
+                const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                const day = date.getDate().toString().padStart(2, '0');
+                return `${year}年${month}月${day}日`;
+            } catch (e) {
+                return dateString;
             }
         }
         
@@ -573,8 +678,8 @@
             });
         }
         
-        // 显示错误
-        function showError(message) {
+        // 显示全局错误
+        function showGlobalError(message) {
             const app = document.getElementById('app');
             app.innerHTML = `
                 <div style="text-align: center; padding: 100px 20px;">
