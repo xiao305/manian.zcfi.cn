@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>2026马年春节 - 各大平台活动汇总导航</title>
+    <!-- 安全相关meta标签 -->
+    <meta name="referrer" content="no-referrer">
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+    <!-- 图标 -->
+    <link rel="icon" type="image/svg+xml" href="favicon/favicon.svg">
+    <link rel="icon" type="image/png" sizes="96x96" href="favicon/favicon-96x96.png">
+    <link rel="icon" type="image/x-icon" href="favicon/favicon.ico">
+    <!-- 字体图标 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- 字体 -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- 样式 -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #fef4f4;
+            color: #333;
+            line-height: 1.6;
+            background-image: linear-gradient(135deg, #fff8f8 0%, #fff 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* 头部样式 */
+        header {
+            text-align: center;
+            padding: 20px 0 30px;
+            background: linear-gradient(145deg, #d32f2f 0%, #b71c1c 100%);
+            color: white;
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 4px 12px rgba(183, 28, 28, 0.15);
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100%;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><text x="5" y="20" font-size="14" fill="rgba(255,255,255,0.05)" transform="rotate(30)">福</text></svg>');
+            background-repeat: repeat;
+            z-index: 0;
+        }
+        
+        .logo-container {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .logo {
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo i {
+            color: #ffd700;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            opacity: 0.9;
+        }
+        
+        .year-badge {
+            display: inline-block;
+            background-color: #ffd700;
+            color: #b71c1c;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-top: 10px;
+        }
+        
+        /* 公告区域 */
+        .announcement {
+            background-color: #fff8e1;
+            border-left: 4px solid #ffd700;
+            padding: 15px;
+            margin-bottom: 25px;
+            border-radius: 0 8px 8px 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .announcement h3 {
+            color: #d32f2f;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        /* 活动卡片区 */
+        .section-title {
+            font-size: 1.6rem;
+            color: #b71c1c;
+            margin: 30px 0 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ffd700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .platforms-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .platform-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: 1px solid #ffebee;
+        }
+        
+        .platform-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(183, 28, 28, 0.12);
+        }
+        
+        .platform-header {
+            padding: 20px;
+            background: linear-gradient(to right, #d32f2f, #b71c1c);
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .platform-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            color: #d32f2f;
+        }
+        
+        .platform-name {
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+        
+        .platform-content {
+            padding: 20px;
+        }
+        
+        .activity-title {
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #333;
+            font-size: 1.1rem;
+        }
+        
+        .activity-desc {
+            color: #666;
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+        }
+        
+        .btn {
+            display: inline-block;
+            background: linear-gradient(to right, #d32f2f, #c2185b);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            text-align: center;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+        }
+        
+        .btn:hover {
+            background: linear-gradient(to right, #b71c1c, #ad1457);
+            box-shadow: 0 4px 8px rgba(183, 28, 28, 0.2);
+        }
+        
+        /* 微信群区域 */
+        .wechat-group {
+            background: linear-gradient(135deg, #f9f9f9 0%, #fff 100%);
+            border-radius: 12px;
+            padding: 25px;
+            margin: 40px 0;
+            border: 2px dashed #d32f2f;
+            text-align: center;
+        }
+        
+        .wechat-group h3 {
+            color: #d32f2f;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .qrcode-container {
+            margin: 20px auto;
+            width: 200px;
+            height: 200px;
+            background-color: #f5f5f5;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            border: 1px solid #eee;
+        }
+        
+        .wechat-note {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #666;
+            background-color: #fff8e1;
+            padding: 10px;
+            border-radius: 6px;
+        }
+        
+        /* 页脚 */
+        footer {
+            text-align: center;
+            padding: 25px 0;
+            color: #666;
+            font-size: 0.9rem;
+            border-top: 1px solid #eee;
+            margin-top: 30px;
+        }
+        
+        .footer-links {
+            margin-top: 10px;
+        }
+        
+        .footer-links a {
+            color: #d32f2f;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .logo {
+                font-size: 2.2rem;
+            }
+            
+            .platforms-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .section-title {
+                font-size: 1.4rem;
+            }
+        }
+        
+        /* 加载状态 */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #d32f2f;
+        }
+        
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #d32f2f;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- 内容将通过JavaScript动态加载 -->
+        <div class="loading">
+            <div class="loading-spinner"></div>
+            <p>正在加载春节活动数据...</p>
+        </div>
+    </div>
+
+    <!-- 主脚本 -->
+    <script>
+        // 配置
+        const CONFIG_GIST_ID = '46c7b1ebed1b795be23a33c149d6de62';
+        const CONFIG_RAW_URL = `https://gist.githubusercontent.com/xiao305/${CONFIG_GIST_ID}/raw/manian-index.json`;
+        
+        // 页面数据
+        let pageData = null;
+        
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                await loadPageData();
+                renderPage();
+                initEventListeners();
+            } catch (error) {
+                console.error('页面初始化失败:', error);
+                showError('加载失败，请刷新页面重试');
+            }
+        });
+        
+        // 加载页面数据
+        async function loadPageData() {
+            try {
+                const response = await fetch(CONFIG_RAW_URL + '?t=' + Date.now());
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                pageData = await response.json();
+            } catch (error) {
+                console.error('加载数据失败:', error);
+                // 使用默认数据
+                pageData = getDefaultData();
+            }
+        }
+        
+        // 获取默认数据
+        function getDefaultData() {
+            return {
+                siteTitle: "马年迎春",
+                siteSubtitle: "2026甲午马年 · 各大平台春节活动一站式导航",
+                yearBadge: "2026 春节活动专区",
+                announcement: {
+                    title: "重要提示",
+                    content: "本页面汇总了2026年马年春节各大主流平台的官方活动，所有链接均为官方活动页面，请放心访问。为确保活动参与顺利，建议及时保存活动链接并关注我们的微信群获取最新信息。"
+                },
+                qrCodeUrl: "",
+                wechatNote: "提示：如二维码失效，请添加客服微信号：chunjie2026 备注'马年活动'邀请入群",
+                activities: [
+                    {
+                        id: "alipay",
+                        platform: "支付宝",
+                        icon: "fab fa-alipay",
+                        activityTitle: "集五福·马上有福",
+                        activityDesc: "2026年支付宝集五福活动全新升级，除了传统的AR扫福，新增马年专属福卡，最高可得666元红包。",
+                        enabled: true
+                    },
+                    {
+                        id: "wechat",
+                        platform: "微信",
+                        icon: "fab fa-weixin",
+                        activityTitle: "马上有红包·视频号春节直播",
+                        activityDesc: "微信视频号春节特别直播，红包封面免费领，直播期间红包雨不停，还可参与马年限定表情包活动。",
+                        enabled: true
+                    },
+                    {
+                        id: "taobao",
+                        platform: "淘宝",
+                        icon: "fas fa-shopping-cart",
+                        activityTitle: "年货节·马上过年",
+                        activityDesc: "淘宝年货节马年特别版，百亿补贴再加码，除夕前每晚8点抢红包，还有马年限定商品专享优惠。",
+                        enabled: true
+                    },
+                    {
+                        id: "douyin",
+                        platform: "抖音",
+                        icon: "fab fa-tiktok",
+                        activityTitle: "新春放映厅·马上有戏",
+                        activityDesc: "抖音春节放映厅活动，看视频抽红包，集卡分5亿，还有马年特效道具和拜年模板免费使用。",
+                        enabled: true
+                    }
+                ],
+                activityTimeline: [
+                    { date: "1月20日", event: "支付宝集五福活动开始" },
+                    { date: "1月25日", event: "抖音春节放映厅上线" },
+                    { date: "1月28日", event: "微信红包封面免费领取开始" },
+                    { date: "2月1日", event: "淘宝年货节高潮期" },
+                    { date: "2月4日", event: "除夕夜各大平台红包雨" }
+                ]
+            };
+        }
+        
+        // 渲染页面
+        function renderPage() {
+            const app = document.getElementById('app');
+            
+            app.innerHTML = `
+                <header>
+                    <div class="container logo-container">
+                        <div class="logo">
+                            <i class="fas fa-horse-head"></i>
+                            <span>${pageData.siteTitle}</span>
+                            <i class="fas fa-gifts"></i>
+                        </div>
+                        <div class="subtitle">${pageData.siteSubtitle}</div>
+                        <div class="year-badge">${pageData.yearBadge}</div>
+                    </div>
+                </header>
+                
+                <div class="container">
+                    <!-- 公告区域 -->
+                    <div class="announcement">
+                        <h3><i class="fas fa-bullhorn"></i> ${pageData.announcement.title}</h3>
+                        <p>${pageData.announcement.content}</p>
+                    </div>
+                    
+                    <!-- 热门活动区域 -->
+                    <h2 class="section-title">
+                        <i class="fas fa-fire-alt"></i> 热门春节活动
+                    </h2>
+                    
+                    <div class="platforms-grid" id="activities-container">
+                        <!-- 活动卡片将通过JavaScript动态生成 -->
+                    </div>
+                    
+                    <!-- 私域微信群区域 -->
+                    <div class="wechat-group">
+                        <h3><i class="fab fa-weixin"></i> 加入我们的私域微信群</h3>
+                        <p>第一时间获取活动更新、参与技巧和独家攻略，与大家一起分享春节活动喜悦！</p>
+                        
+                        <div class="qrcode-container" id="qrcode-container">
+                            <!-- 二维码将通过JavaScript动态加载 -->
+                            <div class="qrcode-placeholder">
+                                <i class="fas fa-qrcode" style="font-size: 3rem; color: #ccc;"></i>
+                                <p style="margin-top: 10px;">微信扫码加入群聊</p>
+                            </div>
+                        </div>
+                        
+                        <p><strong>进群福利：</strong>每日活动提醒 + 独家攻略 + 问题解答 + 活动互助</p>
+                        
+                        <div class="wechat-note">
+                            <p><i class="fas fa-info-circle"></i> ${pageData.wechatNote}</p>
+                        </div>
+                    </div>
+                    
+                    <!-- 活动时间线 -->
+                    <h2 class="section-title">
+                        <i class="fas fa-calendar-alt"></i> 活动时间表
+                    </h2>
+                    
+                    <div style="background-color: white; border-radius: 12px; padding: 20px; margin-bottom: 30px; box-shadow: 0 3px 10px rgba(0,0,0,0.05);">
+                        <ul style="list-style-type: none; padding-left: 0;" id="timeline-container">
+                            <!-- 时间线将通过JavaScript动态生成 -->
+                        </ul>
+                    </div>
+                </div>
+                
+                <footer>
+                    <div class="container">
+                        <p>© 2026 春节马年活动导航 版权所有</p>
+                        <p>本页面仅为活动信息汇总导航，所有活动解释权归各平台官方所有</p>
+                        <div class="footer-links">
+                            <a href="admin/index.html" target="_blank">后台管理</a>
+                        </div>
+                        <p style="margin-top: 15px; font-size: 0.8rem; color: #999;">安全提示：请勿向任何陌生人转账或发送个人信息，谨防诈骗</p>
+                    </div>
+                </footer>
+            `;
+            
+            // 渲染活动卡片
+            renderActivities();
+            
+            // 渲染时间线
+            renderTimeline();
+            
+            // 加载二维码
+            loadQRCode();
+        }
+        
+        // 渲染活动卡片
+        function renderActivities() {
+            const container = document.getElementById('activities-container');
+            if (!container) return;
+            
+            const enabledActivities = pageData.activities.filter(activity => activity.enabled);
+            
+            if (enabledActivities.length === 0) {
+                container.innerHTML = '<div class="error-message">暂无活动数据</div>';
+                return;
+            }
+            
+            container.innerHTML = enabledActivities.map(activity => `
+                <div class="platform-card" data-activity-id="${activity.id}">
+                    <div class="platform-header">
+                        <div class="platform-icon">
+                            <i class="${activity.icon}"></i>
+                        </div>
+                        <div class="platform-name">${activity.platform}</div>
+                    </div>
+                    <div class="platform-content">
+                        <div class="activity-title">${activity.activityTitle}</div>
+                        <div class="activity-desc">${activity.activityDesc}</div>
+                        <a href="activity.html?id=${activity.id}" class="btn">查看活动详情</a>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // 渲染时间线
+        function renderTimeline() {
+            const container = document.getElementById('timeline-container');
+            if (!container || !pageData.activityTimeline) return;
+            
+            container.innerHTML = pageData.activityTimeline.map(item => `
+                <li style="padding: 10px 0; border-bottom: 1px dashed #eee; display: flex; align-items: center;">
+                    <span style="background-color: #d32f2f; color: white; padding: 5px 10px; border-radius: 4px; margin-right: 15px; font-size: 0.9rem;">${item.date}</span>
+                    <span>${item.event}</span>
+                </li>
+            `).join('');
+        }
+        
+        // 加载二维码
+        function loadQRCode() {
+            const container = document.getElementById('qrcode-container');
+            if (!container || !pageData.qrCodeUrl) return;
+            
+            if (pageData.qrCodeUrl.trim()) {
+                container.innerHTML = `
+                    <img src="${pageData.qrCodeUrl}" alt="微信群二维码" style="width: 100%; height: 100%; object-fit: cover; border-radius: 10px;">
+                `;
+            }
+        }
+        
+        // 初始化事件监听器
+        function initEventListeners() {
+            // 卡片点击效果
+            document.querySelectorAll('.platform-card').forEach(card => {
+                card.addEventListener('click', function(e) {
+                    if (!e.target.classList.contains('btn')) {
+                        const link = this.querySelector('a.btn');
+                        if (link) {
+                            window.location.href = link.href;
+                        }
+                    }
+                });
+            });
+        }
+        
+        // 显示错误
+        function showError(message) {
+            const app = document.getElementById('app');
+            app.innerHTML = `
+                <div style="text-align: center; padding: 100px 20px;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #d32f2f; margin-bottom: 20px;"></i>
+                    <h2 style="color: #d32f2f; margin-bottom: 20px;">加载失败</h2>
+                    <p style="margin-bottom: 30px; color: #666;">${message}</p>
+                    <button onclick="location.reload()" style="padding: 12px 30px; background: #d32f2f; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px;">
+                        重新加载
+                    </button>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

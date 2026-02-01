@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>活动详情 - 春节马年活动导航</title>
+    <!-- 安全相关meta标签 -->
+    <meta name="referrer" content="no-referrer">
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+    <!-- 图标 -->
+    <link rel="icon" type="image/svg+xml" href="favicon/favicon.svg">
+    <link rel="icon" type="image/png" sizes="96x96" href="favicon/favicon-96x96.png">
+    <link rel="icon" type="image/x-icon" href="favicon/favicon.ico">
+    <!-- 字体图标 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- 字体 -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- 样式 -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #fef4f4;
+            color: #333;
+            line-height: 1.6;
+            background-image: linear-gradient(135deg, #fff8f8 0%, #fff 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* 头部样式 */
+        header {
+            text-align: center;
+            padding: 20px 0 30px;
+            background: linear-gradient(145deg, #d32f2f 0%, #b71c1c 100%);
+            color: white;
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 4px 12px rgba(183, 28, 28, 0.15);
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100%;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><text x="5" y="20" font-size="14" fill="rgba(255,255,255,0.05)" transform="rotate(30)">福</text></svg>');
+            background-repeat: repeat;
+            z-index: 0;
+        }
+        
+        .logo-container {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .logo {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: white;
+        }
+        
+        .logo i {
+            color: #ffd700;
+        }
+        
+        .activity-header {
+            padding: 30px 0;
+            text-align: center;
+        }
+        
+        .platform-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: white;
+            color: #d32f2f;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+        
+        .activity-title {
+            font-size: 2.2rem;
+            color: white;
+            margin-bottom: 15px;
+        }
+        
+        .activity-subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        /* 内容区域 */
+        .activity-content {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+        }
+        
+        .content-section {
+            margin-bottom: 30px;
+        }
+        
+        .content-section h3 {
+            color: #d32f2f;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ffebee;
+            font-size: 1.4rem;
+        }
+        
+        .content-section p {
+            margin-bottom: 15px;
+            font-size: 1.05rem;
+        }
+        
+        .content-section ul {
+            margin: 15px 0 20px 20px;
+        }
+        
+        .content-section li {
+            margin-bottom: 10px;
+            position: relative;
+            padding-left: 20px;
+        }
+        
+        .content-section li:before {
+            content: "•";
+            color: #d32f2f;
+            font-size: 1.2rem;
+            position: absolute;
+            left: 0;
+            top: -2px;
+        }
+        
+        /* 按钮组 */
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 25px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(to right, #d32f2f, #c2185b);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(to right, #b71c1c, #ad1457);
+            box-shadow: 0 4px 12px rgba(183, 28, 28, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: white;
+            color: #d32f2f;
+            border: 2px solid #d32f2f;
+        }
+        
+        .btn-secondary:hover {
+            background: #ffebee;
+            transform: translateY(-2px);
+        }
+        
+        /* 页脚 */
+        footer {
+            text-align: center;
+            padding: 25px 0;
+            color: #666;
+            font-size: 0.9rem;
+            border-top: 1px solid #eee;
+            margin-top: 30px;
+        }
+        
+        .footer-links {
+            margin-top: 10px;
+        }
+        
+        .footer-links a {
+            color: #d32f2f;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+        
+        /* 加载状态 */
+        .loading {
+            text-align: center;
+            padding: 100px 20px;
+            color: #d32f2f;
+        }
+        
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #d32f2f;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .activity-content {
+                padding: 25px;
+            }
+            
+            .activity-title {
+                font-size: 1.8rem;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- 内容将通过JavaScript动态加载 -->
+        <div class="loading">
+            <div class="loading-spinner"></div>
+            <p>正在加载活动详情...</p>
+        </div>
+    </div>
+
+    <!-- 主脚本 -->
+    <script>
+        // 配置
+        const CONFIG_GIST_ID = '46c7b1ebed1b795be23a33c149d6de62';
+        const CONFIG_RAW_URL = `https://gist.githubusercontent.com/xiao305/${CONFIG_GIST_ID}/raw/manian-index.json`;
+        
+        // 获取URL参数
+        function getUrlParam(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+        
+        // 页面数据
+        let activityData = null;
+        let activityId = null;
+        
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', async function() {
+            activityId = getUrlParam('id');
+            
+            if (!activityId) {
+                showError('未指定活动ID');
+                return;
+            }
+            
+            try {
+                await loadActivityData();
+                renderPage();
+            } catch (error) {
+                console.error('页面初始化失败:', error);
+                showError('加载失败，请刷新页面重试');
+            }
+        });
+        
+        // 加载活动数据
+        async function loadActivityData() {
+            try {
+                const response = await fetch(CONFIG_RAW_URL + '?t=' + Date.now());
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                const data = await response.json();
+                
+                // 查找对应活动
+                const activity = data.activities.find(a => a.id === activityId);
+                if (!activity) {
+                    throw new Error('活动不存在');
+                }
+                
+                activityData = activity;
+                
+                // 如果有活动详情，加载详情
+                if (activity.detailGistId) {
+                    try {
+                        const detailResponse = await fetch(
+                            `https://gist.githubusercontent.com/xiao305/${activity.detailGistId}/raw/activity-detail.json?t=${Date.now()}`
+                        );
+                        if (detailResponse.ok) {
+                            const detailData = await detailResponse.json();
+                            activityData.detail = detailData;
+                        }
+                    } catch (detailError) {
+                        console.warn('加载活动详情失败:', detailError);
+                    }
+                }
+                
+            } catch (error) {
+                console.error('加载活动数据失败:', error);
+                showError(error.message || '加载活动数据失败');
+            }
+        }
+        
+        // 渲染页面
+        function renderPage() {
+            if (!activityData) {
+                showError('活动数据为空');
+                return;
+            }
+            
+            const app = document.getElementById('app');
+            
+            app.innerHTML = `
+                <header>
+                    <div class="container logo-container">
+                        <a href="index.html" class="logo">
+                            <i class="fas fa-horse-head"></i>
+                            <span>马年迎春</span>
+                            <i class="fas fa-gifts"></i>
+                        </a>
+                        <div class="activity-header">
+                            <div class="platform-badge">
+                                <i class="${activityData.icon}"></i>
+                                <span>${activityData.platform}</span>
+                            </div>
+                            <h1 class="activity-title">${activityData.activityTitle}</h1>
+                            <p class="activity-subtitle">${activityData.activityDesc}</p>
+                        </div>
+                    </div>
+                </header>
+                
+                <div class="container">
+                    <div class="activity-content" id="activity-content">
+                        <!-- 活动详情内容将通过JavaScript动态生成 -->
+                    </div>
+                    
+                    <div class="button-group">
+                        <a href="${activityData.officialUrl || '#'}" target="_blank" class="btn btn-primary">
+                            <i class="fas fa-external-link-alt"></i> 前往官方活动页面
+                        </a>
+                        <a href="index.html" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> 返回首页
+                        </a>
+                    </div>
+                </div>
+                
+                <footer>
+                    <div class="container">
+                        <p>© 2026 春节马年活动导航 版权所有</p>
+                        <p>本页面仅为活动信息汇总导航，所有活动解释权归各平台官方所有</p>
+                        <div class="footer-links">
+                            <a href="index.html">返回首页</a>
+                            <a href="admin/index.html" target="_blank">后台管理</a>
+                        </div>
+                    </div>
+                </footer>
+            `;
+            
+            // 渲染活动详情
+            renderActivityDetail();
+        }
+        
+        // 渲染活动详情
+        function renderActivityDetail() {
+            const container = document.getElementById('activity-content');
+            if (!container) return;
+            
+            if (activityData.detail) {
+                // 如果有详细内容，使用详细内容
+                container.innerHTML = activityData.detail.content || `
+                    <div class="content-section">
+                        <h3>活动介绍</h3>
+                        <p>${activityData.activityDesc}</p>
+                    </div>
+                    <div class="content-section">
+                        <h3>活动时间</h3>
+                        <p>2026年1月20日 - 2月15日</p>
+                    </div>
+                    <div class="content-section">
+                        <h3>参与方式</h3>
+                        <p>请点击上方按钮前往官方活动页面参与</p>
+                    </div>
+                `;
+            } else {
+                // 使用默认内容
+                container.innerHTML = `
+                    <div class="content-section">
+                        <h3>活动介绍</h3>
+                        <p>${activityData.activityDesc}</p>
+                    </div>
+                    <div class="content-section">
+                        <h3>活动时间</h3>
+                        <p>2026年1月20日 - 2月15日</p>
+                    </div>
+                    <div class="content-section">
+                        <h3>参与方式</h3>
+                        <ul>
+                            <li>点击上方"前往官方活动页面"按钮</li>
+                            <li>按照页面提示参与活动</li>
+                            <li>分享活动给好友可获得额外奖励</li>
+                        </ul>
+                    </div>
+                    <div class="content-section">
+                        <h3>注意事项</h3>
+                        <ul>
+                            <li>请确保使用最新版本App参与活动</li>
+                            <li>活动奖励需在有效期内领取</li>
+                            <li>请勿相信任何非官方的中奖信息</li>
+                            <li>如有疑问，请咨询官方客服</li>
+                        </ul>
+                    </div>
+                `;
+            }
+        }
+        
+        // 显示错误
+        function showError(message) {
+            const app = document.getElementById('app');
+            app.innerHTML = `
+                <header>
+                    <div class="container logo-container">
+                        <a href="index.html" class="logo">
+                            <i class="fas fa-horse-head"></i>
+                            <span>马年迎春</span>
+                            <i class="fas fa-gifts"></i>
+                        </a>
+                    </div>
+                </header>
+                
+                <div class="container">
+                    <div style="text-align: center; padding: 100px 20px;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #d32f2f; margin-bottom: 20px;"></i>
+                        <h2 style="color: #d32f2f; margin-bottom: 20px;">活动加载失败</h2>
+                        <p style="margin-bottom: 30px; color: #666;">${message}</p>
+                        <div style="display: flex; gap: 15px; justify-content: center;">
+                            <a href="index.html" style="padding: 12px 30px; background: #d32f2f; color: white; border-radius: 6px; text-decoration: none;">
+                                <i class="fas fa-arrow-left"></i> 返回首页
+                            </a>
+                            <button onclick="location.reload()" style="padding: 12px 30px; background: white; color: #d32f2f; border: 2px solid #d32f2f; border-radius: 6px; cursor: pointer;">
+                                重新加载
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
