@@ -211,24 +211,107 @@
             gap: 25px;
         }
         
-        /* 时间线配置 */
+        /* 时间线配置 - 更新样式 */
         .timeline-item {
             display: flex;
-            gap: 15px;
+            gap: 10px;
             margin-bottom: 15px;
             align-items: center;
             padding: 15px;
             background: #f8f9fa;
             border-radius: 10px;
             border: 1px solid #e9ecef;
+            transition: all 0.3s ease;
         }
         
-        .timeline-item input {
+        .timeline-item:hover {
+            background: #f1f3f5;
+        }
+        
+        .timeline-item-number {
+            width: 30px;
+            height: 30px;
+            background: #d32f2f;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        
+        .timeline-item-inputs {
+            flex: 1;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .timeline-item-inputs input {
             flex: 1;
             padding: 12px 15px;
             border: 1px solid #dee2e6;
             border-radius: 8px;
             font-size: 14px;
+        }
+        
+        .timeline-item-actions {
+            display: flex;
+            gap: 5px;
+            flex-shrink: 0;
+        }
+        
+        .timeline-btn {
+            width: 36px;
+            height: 36px;
+            border: none;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+        }
+        
+        .timeline-btn-up {
+            background: #28a745;
+            color: white;
+        }
+        
+        .timeline-btn-up:hover {
+            background: #218838;
+        }
+        
+        .timeline-btn-up:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+        
+        .timeline-btn-down {
+            background: #17a2b8;
+            color: white;
+        }
+        
+        .timeline-btn-down:hover {
+            background: #138496;
+        }
+        
+        .timeline-btn-down:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+        
+        .timeline-btn-delete {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .timeline-btn-delete:hover {
+            background: #c82333;
         }
         
         /* 操作按钮组 */
@@ -431,6 +514,19 @@
             .form-row {
                 grid-template-columns: 1fr;
             }
+            
+            .timeline-item {
+                flex-wrap: wrap;
+            }
+            
+            .timeline-item-inputs {
+                flex-direction: column;
+            }
+            
+            .timeline-item-actions {
+                width: 100%;
+                justify-content: flex-end;
+            }
         }
         
         @media (max-width: 768px) {
@@ -456,6 +552,10 @@
             .admin-btn {
                 width: 100%;
                 justify-content: center;
+            }
+            
+            .timeline-item {
+                padding: 10px;
             }
         }
     </style>
@@ -607,7 +707,7 @@
                 <div class="config-section" id="timeline-config-section">
                     <div class="section-header">
                         <h2><i class="fas fa-calendar-alt"></i> 活动时间线配置</h2>
-                        <p>配置春节活动的重要时间节点</p>
+                        <p>配置春节活动的重要时间节点，可使用上下移动按钮调整顺序</p>
                     </div>
                     
                     <div id="timelineContainer">
@@ -823,15 +923,32 @@
             
             const timeline = configData.activityTimeline;
             
-            container.innerHTML = timeline.map((item, index) => `
+            container.innerHTML = timeline.map((item, index) => {
+                // 计算是否是第一个或最后一个，用于禁用按钮
+                const isFirst = index === 0;
+                const isLast = index === timeline.length - 1;
+                
+                return `
                 <div class="timeline-item" data-index="${index}">
-                    <input type="text" class="timeline-date" placeholder="日期" value="${escapeHtml(item.date || '')}">
-                    <input type="text" class="timeline-event" placeholder="事件" value="${escapeHtml(item.event || '')}">
-                    <button class="admin-btn btn-danger" onclick="removeTimelineItem(${index})" style="padding: 10px 15px;">
-                        <i class="fas fa-trash"></i>
-                    </button>
+                    <div class="timeline-item-number">${index + 1}</div>
+                    <div class="timeline-item-inputs">
+                        <input type="text" class="timeline-date" placeholder="日期（例如：1月20日）" value="${escapeHtml(item.date || '')}">
+                        <input type="text" class="timeline-event" placeholder="事件（例如：支付宝集五福活动开始）" value="${escapeHtml(item.event || '')}">
+                    </div>
+                    <div class="timeline-item-actions">
+                        <button class="timeline-btn timeline-btn-up" onclick="moveTimelineItemUp(${index})" ${isFirst ? 'disabled' : ''} title="上移">
+                            <i class="fas fa-arrow-up"></i>
+                        </button>
+                        <button class="timeline-btn timeline-btn-down" onclick="moveTimelineItemDown(${index})" ${isLast ? 'disabled' : ''} title="下移">
+                            <i class="fas fa-arrow-down"></i>
+                        </button>
+                        <button class="timeline-btn timeline-btn-delete" onclick="removeTimelineItem(${index})" title="删除">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
                 </div>
-            `).join('');
+                `;
+            }).join('');
         }
         
         // 添加时间线项目
@@ -842,6 +959,13 @@
             
             configData.activityTimeline.push({ date: '', event: '' });
             renderTimeline();
+            
+            // 滚动到新添加的项
+            const container = document.getElementById('timelineContainer');
+            const lastItem = container.lastElementChild;
+            if (lastItem) {
+                lastItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
         }
         
         // 移除时间线项目
@@ -855,6 +979,36 @@
                 timeline.splice(index, 1);
                 renderTimeline();
             }
+        }
+        
+        // 上移时间线项目
+        function moveTimelineItemUp(index) {
+            const timeline = configData.activityTimeline || [];
+            if (index <= 0 || index >= timeline.length) {
+                return;
+            }
+            
+            // 交换位置
+            const temp = timeline[index];
+            timeline[index] = timeline[index - 1];
+            timeline[index - 1] = temp;
+            
+            renderTimeline();
+        }
+        
+        // 下移时间线项目
+        function moveTimelineItemDown(index) {
+            const timeline = configData.activityTimeline || [];
+            if (index < 0 || index >= timeline.length - 1) {
+                return;
+            }
+            
+            // 交换位置
+            const temp = timeline[index];
+            timeline[index] = timeline[index + 1];
+            timeline[index + 1] = temp;
+            
+            renderTimeline();
         }
         
         // 清空时间线
