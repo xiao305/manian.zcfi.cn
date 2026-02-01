@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>内容管理 | 春节马年活动后台</title>
+    <!-- 图标 -->
+    <link rel="icon" type="image/svg+xml" href="../favicon/favicon.svg">
+    <link rel="icon" type="image/png" sizes="96x96" href="../favicon/favicon-96x96.png">
+    <link rel="icon" type="image/x-icon" href="../favicon/favicon.ico">
+    <!-- 字体图标 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- 样式 -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+            min-height: 100vh;
+        }
+        
+        .admin-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* 头部样式 */
+        .admin-header {
+            background: white;
+            border-radius: 12px;
+            padding: 20px 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .nav-back {
+            color: #d32f2f;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+        
+        .admin-logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: #d32f2f;
+            text-decoration: none;
+        }
+        
+        .admin-logo span {
+            color: #ffd700;
+        }
+        
+        .header-title h1 {
+            color: #333;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .header-title p {
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        /* 内容布局 */
+        .content-layout {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 30px;
+        }
+        
+        .content-sidebar {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            height: fit-content;
+        }
+        
+        .content-nav {
+            list-style: none;
+        }
+        
+        .content-nav li {
+            margin-bottom: 5px;
+        }
+        
+        .content-nav a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 18px;
+            color: #495057;
+            text-decoration: none;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-size: 15px;
+        }
+        
+        .content-nav a:hover {
+            background: #ffebee;
+            color: #d32f2f;
+        }
+        
+        .content-nav a.active {
+            background: #d32f2f;
+            color: white;
+        }
+        
+        .content-nav i {
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .content-main {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        
+        /* 区块头部 */
+        .section-header {
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .section-header h2 {
+            color: #333;
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .section-header p {
+            color: #666;
+            margin-top: 10px;
+            font-size: 15px;
+        }
+        
+        /* 活动选择器 */
+        .activity-selector {
+            margin-bottom: 30px;
+        }
+        
+        .activity-selector label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .select-control {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            background: white;
+            cursor: pointer;
+        }
+        
+        .select-control:focus {
+            outline: none;
+            border-color: #d32f2f;
+            box-shadow: 0 0 0 4px rgba(211, 47, 47, 0.15);
+        }
+        
+        /* 编辑器区域 */
+        .editor-container {
+            margin-top: 20px;
+        }
+        
+        .editor-toolbar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+            flex-wrap: wrap;
+        }
+        
+        .editor-btn {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+            color: #495057;
+        }
+        
+        .editor-btn:hover {
+            background: #f8f9fa;
+            border-color: #d32f2f;
+            color: #d32f2f;
+        }
+        
+        .editor-btn i {
+            font-size: 14px;
+        }
+        
+        .editor-content {
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            overflow: hidden;
+            min-height: 400px;
+        }
+        
+        #contentEditor {
+            width: 100%;
+            min-height: 400px;
+            padding: 20px;
+            border: none;
+            outline: none;
+            font-size: 15px;
+            line-height: 1.6;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            resize: vertical;
+        }
+        
+        .editor-preview {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border: 1px solid #e9ecef;
+            display: none;
+        }
+        
+        .editor-preview h3 {
+            color: #495057;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        
+        .preview-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            min-height: 200px;
+        }
+        
+        /* 操作按钮组 */
+        .section-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 40px;
+            padding-top: 25px;
+            border-top: 2px solid #f0f0f0;
+        }
+        
+        .admin-btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 15px;
+        }
+        
+        .btn-primary {
+            background: #d32f2f;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #b71c1c;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(211, 47, 47, 0.2);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+        
+        /* 状态信息 */
+        .status-info {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 14px;
+            display: none;
+        }
+        
+        .status-info.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status-info.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .status-info.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        /* 加载状态 */
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+        
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #d32f2f;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+        
+        .empty-state i {
+            font-size: 48px;
+            color: #dee2e6;
+            margin-bottom: 20px;
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 992px) {
+            .content-layout {
+                grid-template-columns: 1fr;
+            }
+            
+            .content-sidebar {
+                position: sticky;
+                top: 20px;
+                z-index: 100;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .admin-container {
+                padding: 15px;
+            }
+            
+            .admin-header {
+                padding: 15px 20px;
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            
+            .content-main, .content-sidebar {
+                padding: 20px;
+            }
+            
+            .section-actions {
+                flex-direction: column;
+            }
+            
+            .admin-btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .editor-toolbar {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-header">
+            <a href="index.html" class="nav-back">
+                <i class="fas fa-arrow-left"></i> 返回登录
+            </a>
+            <a href="../index.html" class="admin-logo">
+                <i class="fas fa-horse-head"></i>
+                <span>马年迎春</span>
+                <i class="fas fa-gifts"></i>
+            </a>
+            <div class="header-title">
+                <h1><i class="fas fa-edit"></i> 内容管理</h1>
+                <p>编辑活动详情页面内容</p>
+            </div>
+        </div>
+        
+        <div class="content-layout">
+            <!-- 左侧导航 -->
+            <div class="content-sidebar">
+                <ul class="content-nav">
+                    <li><a href="#activity-details" class="active">
+                        <i class="fas fa-file-alt"></i> 活动详情编辑
+                    </a></li>
+                    <li><a href="#content-templates">
+                        <i class="fas fa-code"></i> 模板管理
+                    </a></li>
+                </ul>
+                
+                <div style="margin-top: 30px; padding: 20px; background: #ffebee; border-radius: 10px;">
+                    <h4 style="font-size: 15px; margin-bottom: 10px; color: #d32f2f; display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-lightbulb"></i> 使用说明
+                    </h4>
+                    <p style="font-size: 13px; color: #666; line-height: 1.5;">
+                        1. 所有内容从Gist实时加载<br>
+                        2. 编辑后直接保存到对应Gist<br>
+                        3. 支持HTML格式编辑<br>
+                        4. 修改后前端页面实时更新
+                    </p>
+                </div>
+            </div>
+            
+            <!-- 右侧内容 -->
+            <div class="content-main">
+                <!-- 活动详情编辑 -->
+                <div id="activity-details-section">
+                    <div class="section-header">
+                        <h2><i class="fas fa-file-alt"></i> 活动详情编辑</h2>
+                        <p>选择活动并编辑详情页面内容</p>
+                    </div>
+                    
+                    <!-- 活动选择器 -->
+                    <div class="activity-selector">
+                        <label for="activitySelect"><i class="fas fa-list"></i> 选择活动</label>
+                        <select id="activitySelect" class="select-control">
+                            <option value="">请选择活动...</option>
+                        </select>
+                    </div>
+                    
+                    <!-- 编辑器 -->
+                    <div class="editor-container" id="editorContainer" style="display: none;">
+                        <div class="editor-toolbar">
+                            <button type="button" class="editor-btn" onclick="formatText('bold')">
+                                <i class="fas fa-bold"></i> 粗体
+                            </button>
+                            <button type="button" class="editor-btn" onclick="formatText('italic')">
+                                <i class="fas fa-italic"></i> 斜体
+                            </button>
+                            <button type="button" class="editor-btn" onclick="formatText('underline')">
+                                <i class="fas fa-underline"></i> 下划线
+                            </button>
+                            <button type="button" class="editor-btn" onclick="formatText('heading', 'h3')">
+                                <i class="fas fa-heading"></i> 标题
+                            </button>
+                            <button type="button" class="editor-btn" onclick="formatText('paragraph')">
+                                <i class="fas fa-paragraph"></i> 段落
+                            </button>
+                            <button type="button" class="editor-btn" onclick="formatText('list', 'ul')">
+                                <i class="fas fa-list-ul"></i> 列表
+                            </button>
+                            <button type="button" class="editor-btn" onclick="formatText('link')">
+                                <i class="fas fa-link"></i> 链接
+                            </button>
+                            <button type="button" class="editor-btn" onclick="togglePreview()">
+                                <i class="fas fa-eye"></i> 预览
+                            </button>
+                        </div>
+                        
+                        <div class="editor-content">
+                            <textarea id="contentEditor" placeholder="在此编辑活动详情内容..."></textarea>
+                        </div>
+                        
+                        <!-- 预览区域 -->
+                        <div class="editor-preview" id="previewArea">
+                            <h3>内容预览</h3>
+                            <div class="preview-content" id="previewContent">
+                                预览内容将在这里显示...
+                            </div>
+                        </div>
+                        
+                        <!-- 状态信息 -->
+                        <div class="status-info" id="statusInfo"></div>
+                        
+                        <!-- 操作按钮 -->
+                        <div class="section-actions">
+                            <button class="admin-btn btn-primary" onclick="saveContent()">
+                                <i class="fas fa-save"></i> 保存内容
+                            </button>
+                            <button class="admin-btn btn-secondary" onclick="loadSelectedContent()">
+                                <i class="fas fa-sync-alt"></i> 重新加载
+                            </button>
+                            <button class="admin-btn btn-success" onclick="previewInNewWindow()">
+                                <i class="fas fa-external-link-alt"></i> 新窗口预览
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- 加载状态 -->
+                    <div class="loading" id="loadingState">
+                        <div class="loading-spinner"></div>
+                        <p>正在加载活动数据...</p>
+                    </div>
+                    
+                    <!-- 空状态 -->
+                    <div class="empty-state" id="emptyState" style="display: none;">
+                        <i class="fas fa-inbox"></i>
+                        <h3>暂无活动数据</h3>
+                        <p>请先在活动管理中添加活动</p>
+                        <a href="activities.html" class="admin-btn btn-primary" style="margin-top: 15px;">
+                            <i class="fas fa-arrow-right"></i> 前往活动管理
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- 模板管理 -->
+                <div id="content-templates-section" style="display: none;">
+                    <div class="section-header">
+                        <h2><i class="fas fa-code"></i> 模板管理</h2>
+                        <p>管理内容模板和常用代码片段</p>
+                    </div>
+                    
+                    <div class="empty-state">
+                        <i class="fas fa-cogs"></i>
+                        <h3>功能开发中</h3>
+                        <p>模板管理功能正在开发中</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 消息弹窗 -->
+    <div class="modal-overlay" id="messageModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000;">
+        <div class="modal-content" style="background: white; border-radius: 15px; width: 90%; max-width: 400px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+            <div class="modal-header" style="padding: 20px 30px; border-bottom: 1px solid #e9ecef; display: flex; justify-content: space-between; align-items: center;">
+                <div class="modal-title" style="font-size: 20px; font-weight: 600; color: #333;">提示</div>
+                <button class="close-modal" onclick="closeModal()" style="background: none; border: none; font-size: 24px; color: #6c757d; cursor: pointer;">&times;</button>
+            </div>
+            <div class="modal-body" style="padding: 30px;">
+                <p id="messageContent" style="color: #666; margin-bottom: 25px; line-height: 1.5;">消息内容</p>
+                <div style="display: flex; gap: 15px;">
+                    <button class="admin-btn btn-primary" onclick="closeModal()" style="flex: 1;">确定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 配置
+        const MAIN_CONFIG_GIST_ID = '46c7b1ebed1b795be23a33c149d6de62';
+        const token = sessionStorage.getItem('admin_token');
+        
+        // 页面状态
+        let activities = [];
+        let selectedActivity = null;
+        let currentGistId = null;
+        
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', async function() {
+            // 验证登录
+            if (!token || !sessionStorage.getItem('admin_verified')) {
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            setupEventListeners();
+            await loadActivities();
+        });
+        
+        // 设置事件监听器
+        function setupEventListeners() {
+            // 导航点击
+            document.querySelectorAll('.content-nav a').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // 更新导航状态
+                    document.querySelectorAll('.content-nav a').forEach(a => a.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // 显示对应部分
+                    const targetId = this.getAttribute('href').substring(1);
+                    document.querySelectorAll('#activity-details-section, #content-templates-section').forEach(section => {
+                        section.style.display = 'none';
+                    });
+                    
+                    document.getElementById(`${targetId}-section`).style.display = 'block';
+                });
+            });
+            
+            // 活动选择变化
+            document.getElementById('activitySelect').addEventListener('change', function() {
+                const activityId = this.value;
+                if (activityId) {
+                    selectedActivity = activities.find(a => a.id === activityId);
+                    if (selectedActivity) {
+                        loadActivityContent();
+                    }
+                } else {
+                    document.getElementById('editorContainer').style.display = 'none';
+                }
+            });
+            
+            // 编辑器输入事件
+            document.getElementById('contentEditor').addEventListener('input', function() {
+                updatePreview();
+            });
+        }
+        
+        // 加载活动列表
+        async function loadActivities() {
+            try {
+                showLoading();
+                
+                // 尝试多个URL格式
+                const urls = [
+                    `https://gist.githubusercontent.com/xiao305/${MAIN_CONFIG_GIST_ID}/raw/manian-index.json`,
+                    `https://gist.githubusercontent.com/xiao305/${MAIN_CONFIG_GIST_ID}/raw/main/manian-index.json`,
+                    `https://gist.githubusercontent.com/xiao305/${MAIN_CONFIG_GIST_ID}/raw/`,
+                    `https://corsproxy.io/?${encodeURIComponent(`https://gist.githubusercontent.com/xiao305/${MAIN_CONFIG_GIST_ID}/raw/manian-index.json`)}`
+                ];
+                
+                let configData = null;
+                for (const url of urls) {
+                    try {
+                        const response = await fetch(url + '?t=' + Date.now());
+                        if (response.ok) {
+                            const text = await response.text();
+                            if (text.trim()) {
+                                configData = JSON.parse(text);
+                                break;
+                            }
+                        }
+                    } catch (error) {
+                        console.warn(`Failed to load from ${url}:`, error);
+                        continue;
+                    }
+                }
+                
+                if (!configData) {
+                    throw new Error('无法加载活动数据');
+                }
+                
+                activities = configData.activities || [];
+                
+                if (activities.length === 0) {
+                    showEmptyState();
+                    return;
+                }
+                
+                // 填充活动选择器
+                const selectElement = document.getElementById('activitySelect');
+                selectElement.innerHTML = '<option value="">请选择活动...</option>';
+                
+                activities.forEach(activity => {
+                    const option = document.createElement('option');
+                    option.value = activity.id;
+                    option.textContent = `${activity.platform} - ${activity.activityTitle}`;
+                    selectElement.appendChild(option);
+                });
+                
+                hideLoading();
+                hideEmptyState();
+                
+            } catch (error) {
+                console.error('加载活动列表失败:', error);
+                showEmptyState();
+                showStatus(`加载失败: ${error.message}`, 'error');
+            }
+        }
+        
+        // 加载活动内容
+        async function loadActivityContent() {
+            if (!selectedActivity) return;
+            
+            try {
+                showStatus('正在加载内容...', 'info');
+                
+                let content = '';
+                currentGistId = null;
+                
+                // 如果有detailGistId，从该Gist加载
+                if (selectedActivity.detailGistId) {
+                    currentGistId = selectedActivity.detailGistId;
+                    
+                    const urls = [
+                        `https://gist.githubusercontent.com/xiao305/${currentGistId}/raw/activity-detail.json`,
+                        `https://gist.githubusercontent.com/xiao305/${currentGistId}/raw/main/activity-detail.json`,
+                        `https://gist.githubusercontent.com/xiao305/${currentGistId}/raw/`,
+                        `https://corsproxy.io/?${encodeURIComponent(`https://gist.githubusercontent.com/xiao305/${currentGistId}/raw/activity-detail.json`)}`
+                    ];
+                    
+                    for (const url of urls) {
+                        try {
+                            const response = await fetch(url + '?t=' + Date.now());
+                            if (response.ok) {
+                                const text = await response.text();
+                                if (text.trim()) {
+                                    const data = JSON.parse(text);
+                                    content = data.content || '';
+                                    break;
+                                }
+                            }
+                        } catch (error) {
+                            console.warn(`Failed to load detail from ${url}:`, error);
+                            continue;
+                        }
+                    }
+                }
+                
+                // 设置编辑器内容
+                document.getElementById('contentEditor').value = content;
+                
+                // 显示编辑器
+                document.getElementById('editorContainer').style.display = 'block';
+                
+                // 更新预览
+                updatePreview();
+                
+                if (content) {
+                    showStatus('内容加载成功', 'success');
+                } else if (currentGistId) {
+                    showStatus('已加载内容Gist，但内容为空', 'info');
+                } else {
+                    showStatus('该活动暂无详情内容，可新建内容', 'info');
+                }
+                
+            } catch (error) {
+                console.error('加载活动内容失败:', error);
+                showStatus(`加载失败: ${error.message}`, 'error');
+                
+                // 显示编辑器（为空）
+                document.getElementById('contentEditor').value = '';
+                document.getElementById('editorContainer').style.display = 'block';
+                updatePreview();
+            }
+        }
+        
+        // 重新加载选中内容
+        async function loadSelectedContent() {
+            if (!selectedActivity) {
+                showStatus('请先选择活动', 'error');
+                return;
+            }
+            
+            await loadActivityContent();
+        }
+        
+        // 保存内容
+        async function saveContent() {
+            if (!selectedActivity) {
+                showStatus('请先选择活动', 'error');
+                return;
+            }
+            
+            const content = document.getElementById('contentEditor').value.trim();
+            
+            try {
+                showStatus('正在保存...', 'info');
+                
+                let gistId = currentGistId;
+                let needUpdateMainConfig = false;
+                
+                // 如果没有Gist ID，创建新Gist
+                if (!gistId) {
+                    gistId = await createNewGist(content);
+                    needUpdateMainConfig = true;
+                } else {
+                    // 更新现有Gist
+                    await updateGist(gistId, content);
+                }
+                
+                // 如果需要更新主配置（新增Gist的情况）
+                if (needUpdateMainConfig) {
+                    await updateMainConfig(gistId);
+                }
+                
+                currentGistId = gistId;
+                
+                showStatus('保存成功！内容已更新到Gist', 'success');
+                
+            } catch (error) {
+                console.error('保存内容失败:', error);
+                showStatus(`保存失败: ${error.message}`, 'error');
+            }
+        }
+        
+        // 创建新Gist
+        async function createNewGist(content) {
+            const gistData = {
+                description: `活动详情 - ${selectedActivity.platform}`,
+                public: true,
+                files: {
+                    'activity-detail.json': {
+                        content: JSON.stringify({ content }, null, 2)
+                    }
+                }
+            };
+            
+            const response = await fetch('https://api.github.com/gists', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `token ${token}`,
+                    'Accept': 'application/vnd.github.v3+json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(gistData)
+            });
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`创建Gist失败: ${response.status} ${errorText}`);
+            }
+            
+            const result = await response.json();
+            return result.id;
+        }
+        
+        // 更新Gist
+        async function updateGist(gistId, content) {
+            const gistData = {
+                description: `活动详情 - ${selectedActivity.platform}`,
+                files: {
+                    'activity-detail.json': {
+                        content: JSON.stringify({ content }, null, 2)
+                    }
+                }
+            };
+            
+            const response = await fetch(`https://api.github.com/gists/${gistId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': `token ${token}`,
+                    'Accept': 'application/vnd.github.v3+json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(gistData)
+            });
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`更新Gist失败: ${response.status} ${errorText}`);
+            }
+        }
+        
+        // 更新主配置
+        async function updateMainConfig(gistId) {
+            // 首先获取当前配置
+            const urls = [
+                `https://gist.githubusercontent.com/xiao305/${MAIN_CONFIG_GIST_ID}/raw/manian-index.json`,
+                `https://gist.githubusercontent.com/xiao305/${MAIN_CONFIG_GIST_ID}/raw/main/manian-index.json`
+            ];
+            
+            let configData = null;
+            for (const url of urls) {
+                try {
+                    const response = await fetch(url + '?t=' + Date.now());
+                    if (response.ok) {
+                        const text = await response.text();
+                        if (text.trim()) {
+                            configData = JSON.parse(text);
+                            break;
+                        }
+                    }
+                } catch (error) {
+                    continue;
+                }
+            }
+            
+            if (!configData) {
+                throw new Error('无法加载主配置');
+            }
+            
+            // 更新活动的detailGistId
+            const activityIndex = configData.activities.findIndex(a => a.id === selectedActivity.id);
+            if (activityIndex !== -1) {
+                if (!configData.activities[activityIndex].detailGistId) {
+                    configData.activities[activityIndex].detailGistId = gistId;
+                    configData.lastUpdated = new Date().toISOString();
+                    
+                    // 保存更新后的配置
+                    const response = await fetch(`https://api.github.com/gists/${MAIN_CONFIG_GIST_ID}`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Authorization': `token ${token}`,
+                            'Accept': 'application/vnd.github.v3+json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            description: '春节马年活动配置',
+                            files: {
+                                'manian-index.json': {
+                                    content: JSON.stringify(configData, null, 2)
+                                }
+                            }
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error('更新主配置失败');
+                    }
+                }
+            }
+        }
+        
+        // 文本格式化工具
+        function formatText(command, value = null) {
+            const editor = document.getElementById('contentEditor');
+            const start = editor.selectionStart;
+            const end = editor.selectionEnd;
+            const selectedText = editor.value.substring(start, end);
+            let formattedText = '';
+            
+            switch(command) {
+                case 'bold':
+                    formattedText = `<strong>${selectedText}</strong>`;
+                    break;
+                case 'italic':
+                    formattedText = `<em>${selectedText}</em>`;
+                    break;
+                case 'underline':
+                    formattedText = `<u>${selectedText}</u>`;
+                    break;
+                case 'heading':
+                    formattedText = `<${value || 'h3'}>${selectedText || '标题'}</${value || 'h3'}>`;
+                    break;
+                case 'paragraph':
+                    formattedText = `<p>${selectedText || '段落内容'}</p>`;
+                    break;
+                case 'list':
+                    if (value === 'ul') {
+                        formattedText = `<ul>\n  <li>${selectedText || '列表项'}</li>\n</ul>`;
+                    } else {
+                        formattedText = `<ol>\n  <li>${selectedText || '列表项'}</li>\n</ol>`;
+                    }
+                    break;
+                case 'link':
+                    const url = prompt('请输入链接地址:', 'https://');
+                    if (url) {
+                        const linkText = selectedText || '链接文本';
+                        formattedText = `<a href="${escapeHtml(url)}" target="_blank">${escapeHtml(linkText)}</a>`;
+                    } else {
+                        return;
+                    }
+                    break;
+            }
+            
+            editor.value = editor.value.substring(0, start) + formattedText + editor.value.substring(end);
+            editor.focus();
+            editor.setSelectionRange(start + formattedText.length, start + formattedText.length);
+            
+            updatePreview();
+        }
+        
+        // 更新预览
+        function updatePreview() {
+            const content = document.getElementById('contentEditor').value;
+            document.getElementById('previewContent').innerHTML = content || '<em>暂无内容</em>';
+        }
+        
+        // 切换预览显示
+        function togglePreview() {
+            const previewArea = document.getElementById('previewArea');
+            previewArea.style.display = previewArea.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        // 在新窗口预览
+        function previewInNewWindow() {
+            if (!selectedActivity) {
+                showStatus('请先选择活动', 'error');
+                return;
+            }
+            
+            const content = document.getElementById('contentEditor').value;
+            const previewWindow = window.open('', '_blank');
+            previewWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>${selectedActivity.platform} - 内容预览</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+                        h1 { color: #d32f2f; border-bottom: 2px solid #ffd700; padding-bottom: 10px; }
+                        .content { line-height: 1.6; margin-top: 20px; }
+                    </style>
+                </head>
+                <body>
+                    <h1>${escapeHtml(selectedActivity.platform)} - ${escapeHtml(selectedActivity.activityTitle)}</h1>
+                    <div class="content">${content || '<em>暂无内容</em>'}</div>
+                </body>
+                </html>
+            `);
+            previewWindow.document.close();
+        }
+        
+        // 显示状态信息
+        function showStatus(message, type = 'info') {
+            const statusElement = document.getElementById('statusInfo');
+            statusElement.textContent = message;
+            statusElement.className = `status-info ${type}`;
+            statusElement.style.display = 'block';
+            
+            // 自动隐藏
+            if (type !== 'error') {
+                setTimeout(() => {
+                    statusElement.style.display = 'none';
+                }, 3000);
+            }
+        }
+        
+        // 显示加载状态
+        function showLoading() {
+            document.getElementById('loadingState').style.display = 'block';
+            document.getElementById('emptyState').style.display = 'none';
+            document.getElementById('editorContainer').style.display = 'none';
+        }
+        
+        // 隐藏加载状态
+        function hideLoading() {
+            document.getElementById('loadingState').style.display = 'none';
+        }
+        
+        // 显示空状态
+        function showEmptyState() {
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('emptyState').style.display = 'block';
+            document.getElementById('editorContainer').style.display = 'none';
+        }
+        
+        // 隐藏空状态
+        function hideEmptyState() {
+            document.getElementById('emptyState').style.display = 'none';
+        }
+        
+        // 显示消息弹窗
+        function showMessage(message) {
+            document.getElementById('messageContent').textContent = message;
+            document.getElementById('messageModal').style.display = 'flex';
+        }
+        
+        // 关闭消息弹窗
+        function closeModal() {
+            document.getElementById('messageModal').style.display = 'none';
+        }
+        
+        // HTML转义
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
