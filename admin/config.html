@@ -544,7 +544,7 @@
                 <div class="config-section" id="qrcode-config-section">
                     <div class="section-header">
                         <h2><i class="fas fa-qrcode"></i> 微信群二维码配置</h2>
-                        <p>配置微信群二维码图片链接和提示信息</p>
+                        <p>配置微信群二维码图片链接、过期时间和提示信息</p>
                     </div>
                     
                     <div class="form-group">
@@ -553,6 +553,24 @@
                         <small style="color: #666; font-size: 13px; margin-top: 8px; display: block;">
                             请输入二维码图片的完整URL地址。建议使用稳定的图床服务。
                         </small>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="qrCodeExpire"><i class="fas fa-calendar-times"></i> 过期时间</label>
+                            <input type="date" id="qrCodeExpire" class="form-control" placeholder="选择日期">
+                            <small style="color: #666; font-size: 13px; margin-top: 8px; display: block;">
+                                设置二维码过期时间（选填）
+                            </small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="qrCodeExpireDisplay"><i class="fas fa-eye"></i> 过期时间预览</label>
+                            <input type="text" id="qrCodeExpireDisplay" class="form-control" readonly placeholder="将显示格式化日期">
+                            <small style="color: #666; font-size: 13px; margin-top: 8px; display: block;">
+                                前台将显示此格式
+                            </small>
+                        </div>
                     </div>
                     
                     <div class="form-group">
@@ -610,8 +628,8 @@
                         <button class="admin-btn btn-primary" onclick="saveSection('timeline')">
                             <i class="fas fa-save"></i> 保存时间线配置
                         </button>
-                        <button class="admin-btn btn-secondary" onclick="resetTimeline()">
-                            <i class="fas fa-undo"></i> 重置为默认
+                        <button class="admin-btn btn-secondary" onclick="clearTimeline()">
+                            <i class="fas fa-trash"></i> 清空时间线
                         </button>
                     </div>
                 </div>
@@ -709,6 +727,12 @@
                 });
             });
             
+            // 过期时间输入监听
+            const expireDateInput = document.getElementById('qrCodeExpire');
+            if (expireDateInput) {
+                expireDateInput.addEventListener('change', updateExpireDatePreview);
+            }
+            
             // 弹窗事件
             document.getElementById('closeMessageBtn').addEventListener('click', closeMessageModal);
             document.getElementById('confirmMessageBtn').addEventListener('click', closeMessageModal);
@@ -722,58 +746,57 @@
         // 加载配置
         async function loadConfig() {
             try {
-                showMessage('加载中', '正在加载配置数据...', false);
+                showMessage('加载中', '正在从Gist加载配置数据...', false);
                 
                 const response = await fetch(
                     `https://gist.githubusercontent.com/xiao305/${CONFIG_GIST_ID}/raw/manian-index.json?t=${Date.now()}`
                 );
                 
                 if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
+                    throw new Error(`HTTP ${response.status} - 无法从Gist加载数据`);
                 }
                 
                 configData = await response.json();
+                
+                // 验证数据格式
+                if (!configData || typeof configData !== 'object') {
+                    throw new Error('Gist数据格式错误');
+                }
+                
                 populateForms();
                 renderTimeline();
                 updateQRCodePreview();
+                updateExpireDatePreview();
                 closeMessageModal();
                 
             } catch (error) {
                 console.error('加载配置失败:', error);
                 showMessage('错误', '加载配置失败: ' + error.message);
                 
-                // 使用默认数据
-                configData = getDefaultConfig();
+                // 初始化空配置
+                configData = {
+                    siteTitle: "",
+                    siteSubtitle: "",
+                    yearBadge: "",
+                    qrCodeUrl: "",
+                    wechatNote: "",
+                    qrCodeExpire: "",
+                    announcement: {
+                        title: "",
+                        content: ""
+                    },
+                    activityTimeline: []
+                };
+                
                 populateForms();
                 renderTimeline();
             }
         }
         
-        // 获取默认配置
-        function getDefaultConfig() {
-            return {
-                siteTitle: "马年迎春",
-                siteSubtitle: "2026甲午马年 · 各大平台春节活动一站式导航",
-                yearBadge: "2026 春节活动专区",
-                qrCodeUrl: "",
-                wechatNote: "提示：如二维码失效，请添加客服微信号：chunjie2026 备注'马年活动'邀请入群",
-                announcement: {
-                    title: "重要提示",
-                    content: "本页面汇总了2026年马年春节各大主流平台的官方活动，所有链接均为官方活动页面，请放心访问。为确保活动参与顺利，建议及时保存活动链接并关注我们的微信群获取最新信息。"
-                },
-                activityTimeline: [
-                    { date: "1月20日", event: "支付宝集五福活动开始" },
-                    { date: "1月25日", event: "抖音春节放映厅上线" },
-                    { date: "1月28日", event: "微信红包封面免费领取开始" },
-                    { date: "2月1日", event: "淘宝年货节高潮期" },
-                    { date: "2月4日", event: "除夕夜各大平台红包雨" }
-                ],
-                lastUpdated: new Date().toISOString()
-            };
-        }
-        
         // 填充表单
         function populateForms() {
+            if (!configData) return;
+            
             // 网站信息
             document.getElementById('siteTitle').value = configData.siteTitle || '';
             document.getElementById('siteSubtitle').value = configData.siteSubtitle || '';
@@ -782,21 +805,23 @@
             // 二维码配置
             document.getElementById('qrCodeUrl').value = configData.qrCodeUrl || '';
             document.getElementById('wechatNote').value = configData.wechatNote || '';
+            document.getElementById('qrCodeExpire').value = configData.qrCodeExpire || '';
             
             // 公告配置
-            document.getElementById('announcementTitle').value = configData.announcement?.title || '';
-            document.getElementById('announcementContent').value = configData.announcement?.content || '';
+            const announcement = configData.announcement || {};
+            document.getElementById('announcementTitle').value = announcement.title || '';
+            document.getElementById('announcementContent').value = announcement.content || '';
         }
         
         // 渲染时间线
         function renderTimeline() {
             const container = document.getElementById('timelineContainer');
-            const timeline = configData.activityTimeline || [];
-            
-            if (timeline.length === 0) {
-                container.innerHTML = '<div class="empty-state">暂无时间线数据</div>';
+            if (!configData.activityTimeline || configData.activityTimeline.length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 40px; color: #666;">暂无时间线数据，请点击"添加时间节点"按钮创建</div>';
                 return;
             }
+            
+            const timeline = configData.activityTimeline;
             
             container.innerHTML = timeline.map((item, index) => `
                 <div class="timeline-item" data-index="${index}">
@@ -811,32 +836,35 @@
         
         // 添加时间线项目
         function addTimelineItem() {
-            const container = document.getElementById('timelineContainer');
-            const timeline = configData.activityTimeline || [];
+            if (!configData.activityTimeline) {
+                configData.activityTimeline = [];
+            }
             
-            timeline.push({ date: '', event: '' });
-            configData.activityTimeline = timeline;
+            configData.activityTimeline.push({ date: '', event: '' });
             renderTimeline();
         }
         
         // 移除时间线项目
         function removeTimelineItem(index) {
-            if (confirm('确定要删除这个时间节点吗？')) {
-                const timeline = configData.activityTimeline || [];
-                if (index >= 0 && index < timeline.length) {
-                    timeline.splice(index, 1);
-                    configData.activityTimeline = timeline;
-                    renderTimeline();
-                }
+            if (!confirm('确定要删除这个时间节点吗？')) {
+                return;
+            }
+            
+            const timeline = configData.activityTimeline || [];
+            if (index >= 0 && index < timeline.length) {
+                timeline.splice(index, 1);
+                renderTimeline();
             }
         }
         
-        // 重置时间线
-        function resetTimeline() {
-            if (confirm('确定要重置时间线为默认值吗？当前修改将会丢失。')) {
-                configData.activityTimeline = getDefaultConfig().activityTimeline;
-                renderTimeline();
+        // 清空时间线
+        function clearTimeline() {
+            if (!confirm('确定要清空所有时间节点吗？此操作不可撤销。')) {
+                return;
             }
+            
+            configData.activityTimeline = [];
+            renderTimeline();
         }
         
         // 更新二维码预览
@@ -858,6 +886,26 @@
                         <div>等待配置二维码链接</div>
                     </div>
                 `;
+            }
+        }
+        
+        // 更新过期时间预览
+        function updateExpireDatePreview() {
+            const expireDate = document.getElementById('qrCodeExpire').value;
+            const displayInput = document.getElementById('qrCodeExpireDisplay');
+            
+            if (expireDate) {
+                try {
+                    const date = new Date(expireDate);
+                    const year = date.getFullYear();
+                    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                    const day = date.getDate().toString().padStart(2, '0');
+                    displayInput.value = `${year}年${month}月${day}日`;
+                } catch (e) {
+                    displayInput.value = '日期格式错误';
+                }
+            } else {
+                displayInput.value = '未设置';
             }
         }
         
@@ -913,6 +961,7 @@
                     case 'qrcode':
                         configData.qrCodeUrl = document.getElementById('qrCodeUrl').value.trim();
                         configData.wechatNote = document.getElementById('wechatNote').value.trim();
+                        configData.qrCodeExpire = document.getElementById('qrCodeExpire').value.trim() || '';
                         break;
                         
                     case 'timeline':
@@ -939,6 +988,12 @@
                 // 更新最后修改时间
                 configData.lastUpdated = new Date().toISOString();
                 
+                // 验证数据
+                if (!validateConfigData()) {
+                    showMessage('验证失败', '请检查配置数据是否完整');
+                    return;
+                }
+                
                 // 保存到Gist
                 showMessage('保存中', '正在保存配置到Gist...', false);
                 
@@ -960,7 +1015,8 @@
                 });
                 
                 if (!saveResponse.ok) {
-                    throw new Error(`保存失败: ${saveResponse.status}`);
+                    const errorData = await saveResponse.json().catch(() => ({}));
+                    throw new Error(`保存失败: ${saveResponse.status} - ${errorData.message || '未知错误'}`);
                 }
                 
                 showMessage('成功', '配置已成功保存到Gist');
@@ -969,6 +1025,27 @@
                 console.error('保存失败:', error);
                 showMessage('错误', '保存失败: ' + error.message);
             }
+        }
+        
+        // 验证配置数据
+        function validateConfigData() {
+            // 检查必填字段
+            if (!configData.siteTitle || !configData.siteTitle.trim()) {
+                showMessage('验证失败', '网站标题不能为空');
+                return false;
+            }
+            
+            // 检查二维码URL格式（如果提供了）
+            if (configData.qrCodeUrl && configData.qrCodeUrl.trim()) {
+                try {
+                    new URL(configData.qrCodeUrl);
+                } catch (e) {
+                    showMessage('验证失败', '二维码链接格式不正确');
+                    return false;
+                }
+            }
+            
+            return true;
         }
         
         // 显示消息弹窗
