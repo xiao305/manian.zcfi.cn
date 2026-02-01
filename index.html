@@ -438,11 +438,6 @@
                     throw new Error('数据格式错误');
                 }
                 
-                // 确保二维码过期时间字段存在（如果后端还没添加，前端提供默认值）
-                if (!pageData.qrCodeExpire) {
-                    pageData.qrCodeExpire = "2026-02-18"; // 默认到元宵节
-                }
-                
             } catch (error) {
                 console.error('加载数据失败:', error);
                 hasError = true;
@@ -501,11 +496,9 @@
                         </div>
                         
                         <!-- 二维码过期时间显示 -->
-                        ${pageData.qrCodeExpire ? `
                         <div class="qrcode-expire">
-                            <i class="fas fa-clock"></i> 二维码有效期至：${formatDate(pageData.qrCodeExpire)}
+                            <i class="fas fa-clock"></i> 二维码有效期至：${pageData.qrCodeExpire ? formatDate(pageData.qrCodeExpire) : '未知'}
                         </div>
-                        ` : ''}
                         
                         <p><strong>进群福利：</strong>每日活动提醒 + 独家攻略 + 问题解答 + 活动互助</p>
                         
