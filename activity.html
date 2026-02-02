@@ -482,6 +482,41 @@
             padding: 30px;
         }
         
+        /* 口令弹窗样式 */
+        .code-modal {
+            max-width: 500px;
+        }
+        
+        .code-content {
+            text-align: center;
+        }
+        
+        .code-box {
+            background: #f8f9fa;
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            font-size: 1.2rem;
+            font-weight: 600;
+            word-break: break-all;
+            color: #d32f2f;
+        }
+        
+        .copy-code-btn {
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        
+        .open-app-btn {
+            width: 100%;
+            background: linear-gradient(to right, #007bff, #0056b3);
+        }
+        
+        .open-app-btn:hover {
+            background: linear-gradient(to right, #0069d9, #004a99);
+        }
+        
         /* 页脚 */
         footer {
             text-align: center;
@@ -560,6 +595,11 @@
                 height: 50px;
                 font-size: 35px;
             }
+            
+            .code-box {
+                font-size: 1rem;
+                padding: 15px;
+            }
         }
         
         /* 隐藏内容直到JS加载完成 */
@@ -634,6 +674,31 @@
             </div>
         </div>
     </div>
+    
+    <!-- 口令弹窗 -->
+    <div class="modal-overlay" id="codeModal">
+        <div class="modal-content code-modal">
+            <div class="modal-header">
+                <div class="modal-title">口令已复制</div>
+                <button class="close-modal" id="closeCodeBtn">&times;</button>
+            </div>
+            <div class="modal-body code-content">
+                <p>活动口令已复制到剪贴板</p>
+                <div class="code-box" id="codeDisplay">
+                    <!-- 口令内容将显示在这里 -->
+                </div>
+                <p id="codeInstruction">请打开对应App查看活动</p>
+                <div class="button-group" style="margin-top: 25px;">
+                    <button class="btn btn-primary copy-code-btn" id="copyCodeBtn">
+                        <i class="fas fa-copy"></i> 重新复制口令
+                    </button>
+                    <button class="btn open-app-btn" id="openAppBtn">
+                        <i class="fas fa-external-link-alt"></i> 打开<span id="platformName">对应App</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- 主脚本 -->
     <script>
@@ -670,10 +735,28 @@
             return ua.indexOf('micromessenger') !== -1;
         }
         
+        // 检测输入的是链接还是口令
+        function detectUrlType(input) {
+            if (!input || input.trim() === '') {
+                return 'empty';
+            }
+            
+            const url = input.trim();
+            // 检查是否是URL
+            const urlPattern = /^(https?:\/\/)/i;
+            
+            if (urlPattern.test(url)) {
+                return 'link';
+            } else {
+                return 'code';
+            }
+        }
+        
         // 页面数据
         let activityData = null;
         let activityId = null;
         let isWeChat = false;
+        let currentCode = '';
         
         // 设置页面标题
         function setPageTitle(title) {
@@ -729,6 +812,179 @@
             }
         }
         
+        // 复制文本到剪贴板
+        function copyToClipboard(text) {
+            return new Promise((resolve, reject) => {
+                // 创建一个临时的textarea元素
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.style.position = 'fixed';
+                textarea.style.opacity = '0';
+                document.body.appendChild(textarea);
+                
+                // 选中并复制
+                textarea.select();
+                textarea.setSelectionRange(0, textarea.value.length);
+                
+                try {
+                    const successful = document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                    
+                    if (successful) {
+                        resolve();
+                    } else {
+                        reject(new Error('复制失败'));
+                    }
+                } catch (err) {
+                    document.body.removeChild(textarea);
+                    reject(err);
+                }
+            });
+        }
+        
+        // 根据平台名称获取对应的App打开信息
+        function getAppOpenInfo(platform) {
+            const platformMap = {
+                '支付宝': { 
+                    scheme: 'alipays://', 
+                    appName: '支付宝',
+                    package: 'com.eg.android.AlipayGphone'
+                },
+                '微信': { 
+                    scheme: 'weixin://', 
+                    appName: '微信',
+                    package: 'com.tencent.mm'
+                },
+                '淘宝': { 
+                    scheme: 'taobao://', 
+                    appName: '淘宝',
+                    package: 'com.taobao.taobao'
+                },
+                '抖音': { 
+                    scheme: 'snssdk1128://', 
+                    appName: '抖音',
+                    package: 'com.ss.android.ugc.aweme'
+                },
+                '京东': { 
+                    scheme: 'openapp.jdmoble://', 
+                    appName: '京东',
+                    package: 'com.jingdong.app.mall'
+                },
+                '拼多多': { 
+                    scheme: 'pinduoduo://', 
+                    appName: '拼多多',
+                    package: 'com.xunmeng.pinduoduo'
+                },
+                '微博': { 
+                    scheme: 'sinaweibo://', 
+                    appName: '微博',
+                    package: 'com.sina.weibo'
+                },
+                '百度': { 
+                    scheme: 'baiduboxapp://', 
+                    appName: '百度',
+                    package: 'com.baidu.searchbox'
+                }
+            };
+            
+            // 默认值
+            return platformMap[platform] || { 
+                scheme: null, 
+                appName: platform,
+                package: null
+            };
+        }
+        
+        // 打开App
+        function openApp(scheme, fallbackUrl = null) {
+            if (!scheme) {
+                if (fallbackUrl) {
+                    window.location.href = fallbackUrl;
+                }
+                return;
+            }
+            
+            // 尝试打开App
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.src = scheme;
+            
+            document.body.appendChild(iframe);
+            
+            // 检查是否成功打开App
+            setTimeout(() => {
+                document.body.removeChild(iframe);
+                
+                // 如果没有打开App，则尝试跳转到下载页面或网页版
+                if (fallbackUrl) {
+                    setTimeout(() => {
+                        window.location.href = fallbackUrl;
+                    }, 500);
+                }
+            }, 2000);
+        }
+        
+        // 显示口令弹窗
+        function showCodeModal(code, platform) {
+            currentCode = code;
+            
+            // 获取平台信息
+            const appInfo = getAppOpenInfo(platform);
+            
+            // 更新弹窗内容
+            document.getElementById('codeDisplay').textContent = code;
+            document.getElementById('platformName').textContent = appInfo.appName;
+            
+            // 更新打开App按钮
+            const openAppBtn = document.getElementById('openAppBtn');
+            if (appInfo.scheme) {
+                openAppBtn.style.display = 'inline-flex';
+                openAppBtn.onclick = () => {
+                    openApp(appInfo.scheme);
+                };
+            } else {
+                openAppBtn.style.display = 'none';
+            }
+            
+            // 显示弹窗
+            document.getElementById('codeModal').classList.add('show');
+            
+            // 自动复制口令
+            setTimeout(() => {
+                copyToClipboard(code)
+                    .then(() => {
+                        console.log('口令已自动复制');
+                    })
+                    .catch(err => {
+                        console.error('自动复制失败:', err);
+                    });
+            }, 300);
+        }
+        
+        // 关闭口令弹窗
+        function closeCodeModal() {
+            document.getElementById('codeModal').classList.remove('show');
+        }
+        
+        // 处理官方活动按钮点击
+        function handleOfficialButtonClick() {
+            if (!activityData || !activityData.officialUrl || activityData.officialUrl.trim() === '') {
+                showMessage('提示', '该活动暂未配置官方页面，请稍后再试。');
+                return;
+            }
+            
+            const url = activityData.officialUrl.trim();
+            const urlType = activityData.urlType || detectUrlType(url);
+            
+            if (urlType === 'link') {
+                // 直接在新窗口打开链接
+                window.open(url, '_blank');
+            } else {
+                // 显示口令弹窗
+                showCodeModal(url, activityData.platform);
+            }
+        }
+        
         // 初始化页面
         document.addEventListener('DOMContentLoaded', async function() {
             activityId = getUrlParam('id');
@@ -770,6 +1026,26 @@
             document.getElementById('messageModal').addEventListener('click', function(e) {
                 if (e.target === this) closeMessageModal();
             });
+            
+            // 口令弹窗事件
+            document.getElementById('closeCodeBtn').addEventListener('click', closeCodeModal);
+            
+            // 复制口令按钮事件
+            document.getElementById('copyCodeBtn').addEventListener('click', function() {
+                copyToClipboard(currentCode)
+                    .then(() => {
+                        showMessage('成功', '口令已复制到剪贴板');
+                    })
+                    .catch(err => {
+                        console.error('复制失败:', err);
+                        showMessage('提示', '复制失败，请手动选择并复制');
+                    });
+            });
+            
+            // 点击背景关闭口令弹窗
+            document.getElementById('codeModal').addEventListener('click', function(e) {
+                if (e.target === this) closeCodeModal();
+            });
         }
         
         // 加载活动数据
@@ -789,6 +1065,11 @@
                 }
                 
                 activityData = activity;
+                
+                // 如果没有urlType字段，自动检测
+                if (!activityData.urlType) {
+                    activityData.urlType = detectUrlType(activityData.officialUrl || '');
+                }
                 
                 // 如果有活动详情，加载详情（非阻塞）
                 if (activity.detailGistId) {
@@ -839,6 +1120,15 @@
             
             const app = document.getElementById('app');
             
+            // 根据活动类型决定按钮文字
+            const buttonText = activityData.urlType === 'link' ? 
+                '前往官方活动页面' : 
+                '复制活动口令';
+            
+            const buttonIcon = activityData.urlType === 'link' ? 
+                'fas fa-external-link-alt' : 
+                'fas fa-copy';
+            
             // 根据是否在微信环境决定是否显示分享按钮
             const shareButtonHTML = isWeChat ? `
                 <button id="share-btn" class="btn btn-success">
@@ -877,7 +1167,7 @@
                     
                     <div class="button-group">
                         <button id="official-btn" class="btn btn-primary">
-                            <i class="fas fa-external-link-alt"></i> 前往官方活动页面
+                            <i class="${buttonIcon}"></i> ${buttonText}
                         </button>
                         ${shareButtonHTML}
                         <a href="index.html" class="btn btn-secondary">
@@ -943,13 +1233,7 @@
             // 官方活动页面按钮
             const officialBtn = document.getElementById('official-btn');
             if (officialBtn) {
-                officialBtn.addEventListener('click', function() {
-                    if (activityData.officialUrl && activityData.officialUrl.trim() !== '') {
-                        window.open(activityData.officialUrl, '_blank');
-                    } else {
-                        showMessage('提示', '该活动暂未配置官方页面，请稍后再试。');
-                    }
-                });
+                officialBtn.addEventListener('click', handleOfficialButtonClick);
             }
             
             // 分享按钮（仅在微信环境中显示）
