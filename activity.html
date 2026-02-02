@@ -484,23 +484,46 @@
         
         /* 口令弹窗样式 */
         .code-modal {
-            max-width: 500px;
+            max-width: 450px;
         }
         
         .code-content {
             text-align: center;
         }
         
+        .code-warning {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            color: #856404;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
         .code-box {
             background: #f8f9fa;
-            border: 2px dashed #dee2e6;
+            border: 2px solid #e9ecef;
             border-radius: 8px;
             padding: 20px;
-            margin: 20px 0;
-            font-size: 1.2rem;
+            margin: 15px 0;
+            font-size: 1.1rem;
             font-weight: 600;
             word-break: break-all;
             color: #d32f2f;
+            position: relative;
+        }
+        
+        .code-box:after {
+            content: "已自动复制到剪贴板";
+            position: absolute;
+            bottom: -25px;
+            left: 0;
+            right: 0;
+            font-size: 12px;
+            color: #28a745;
+            font-weight: normal;
         }
         
         .copy-code-btn {
@@ -600,6 +623,11 @@
                 font-size: 1rem;
                 padding: 15px;
             }
+            
+            .code-warning {
+                padding: 12px;
+                font-size: 13px;
+            }
         }
         
         /* 隐藏内容直到JS加载完成 */
@@ -679,15 +707,18 @@
     <div class="modal-overlay" id="codeModal">
         <div class="modal-content code-modal">
             <div class="modal-header">
-                <div class="modal-title">口令已复制</div>
+                <div class="modal-title">活动口令</div>
                 <button class="close-modal" id="closeCodeBtn">&times;</button>
             </div>
             <div class="modal-body code-content">
+                <div class="code-warning">
+                    <i class="fas fa-exclamation-circle"></i> 
+                    本活动不支持网页直接打开，请复制口令到对应App参与活动
+                </div>
                 <p>活动口令已复制到剪贴板</p>
                 <div class="code-box" id="codeDisplay">
                     <!-- 口令内容将显示在这里 -->
                 </div>
-                <p id="codeInstruction">请打开对应App查看活动</p>
                 <div class="button-group" style="margin-top: 25px;">
                     <button class="btn btn-primary copy-code-btn" id="copyCodeBtn">
                         <i class="fas fa-copy"></i> 重新复制口令
@@ -742,7 +773,7 @@
             }
             
             const url = input.trim();
-            // 检查是否是URL
+            // 检查是否是URL（以http://或https://开头）
             const urlPattern = /^(https?:\/\/)/i;
             
             if (urlPattern.test(url)) {
@@ -848,42 +879,50 @@
                 '支付宝': { 
                     scheme: 'alipays://', 
                     appName: '支付宝',
-                    package: 'com.eg.android.AlipayGphone'
+                    package: 'com.eg.android.AlipayGphone',
+                    storeUrl: 'https://apps.apple.com/cn/app/%E6%94%AF%E4%BB%98%E5%AE%9D-%E8%81%9A%E5%AE%9D%E5%A4%8D%E5%88%9B%E6%9B%B4%E5%A5%BD%E7%9A%84%E6%94%AF%E4%BB%98%E5%AE%9D/id333206289'
                 },
                 '微信': { 
                     scheme: 'weixin://', 
                     appName: '微信',
-                    package: 'com.tencent.mm'
+                    package: 'com.tencent.mm',
+                    storeUrl: 'https://apps.apple.com/cn/app/%E5%BE%AE%E4%BF%A1/id414478124'
                 },
                 '淘宝': { 
                     scheme: 'taobao://', 
                     appName: '淘宝',
-                    package: 'com.taobao.taobao'
+                    package: 'com.taobao.taobao',
+                    storeUrl: 'https://apps.apple.com/cn/app/%E6%B7%98%E5%AE%9D-%E7%9C%8B%E6%88%91%E6%94%B6%E8%97%8F%E7%9A%84%E4%B8%96%E7%95%8C/id387682726'
                 },
                 '抖音': { 
                     scheme: 'snssdk1128://', 
                     appName: '抖音',
-                    package: 'com.ss.android.ugc.aweme'
+                    package: 'com.ss.android.ugc.aweme',
+                    storeUrl: 'https://apps.apple.com/cn/app/%E6%8A%96%E9%9F%B3-%E8%AE%B0%E5%BD%95%E7%9C%9F%E5%AE%9E%E7%94%9F%E6%B4%BB/id1142110895'
                 },
                 '京东': { 
                     scheme: 'openapp.jdmoble://', 
                     appName: '京东',
-                    package: 'com.jingdong.app.mall'
+                    package: 'com.jingdong.app.mall',
+                    storeUrl: 'https://apps.apple.com/cn/app/%E4%BA%AC%E4%B8%9C-%E5%A4%9A%E5%BF%AB%E5%A5%BD%E7%9C%81/id414245413'
                 },
                 '拼多多': { 
                     scheme: 'pinduoduo://', 
                     appName: '拼多多',
-                    package: 'com.xunmeng.pinduoduo'
+                    package: 'com.xunmeng.pinduoduo',
+                    storeUrl: 'https://apps.apple.com/cn/app/%E6%8B%BC%E5%A4%9A%E5%A4%9A-%E5%A4%9A%E5%A4%9A%E4%B9%B0%E8%8F%9C%E5%A4%9A%E5%A4%9A%E4%BC%98%E9%80%89/id1044283059'
                 },
                 '微博': { 
                     scheme: 'sinaweibo://', 
                     appName: '微博',
-                    package: 'com.sina.weibo'
+                    package: 'com.sina.weibo',
+                    storeUrl: 'https://apps.apple.com/cn/app/%E5%BE%AE%E5%8D%9A/id350962117'
                 },
                 '百度': { 
                     scheme: 'baiduboxapp://', 
                     appName: '百度',
-                    package: 'com.baidu.searchbox'
+                    package: 'com.baidu.searchbox',
+                    storeUrl: 'https://apps.apple.com/cn/app/%E7%99%BE%E5%BA%A6/id382201985'
                 }
             };
             
@@ -891,37 +930,56 @@
             return platformMap[platform] || { 
                 scheme: null, 
                 appName: platform,
-                package: null
+                package: null,
+                storeUrl: null
             };
         }
         
-        // 打开App
-        function openApp(scheme, fallbackUrl = null) {
+        // 尝试打开App
+        function tryOpenApp(scheme, storeUrl) {
             if (!scheme) {
-                if (fallbackUrl) {
-                    window.location.href = fallbackUrl;
+                // 如果没有scheme，直接跳转到应用商店
+                if (storeUrl) {
+                    window.location.href = storeUrl;
                 }
                 return;
             }
             
-            // 尝试打开App
+            // 记录开始时间
+            const startTime = Date.now();
+            
+            // 创建一个隐藏的iframe来尝试打开App
             const iframe = document.createElement('iframe');
             iframe.style.display = 'none';
             iframe.src = scheme;
             
             document.body.appendChild(iframe);
             
-            // 检查是否成功打开App
+            // 监听页面可见性变化，判断是否成功打开App
+            const visibilityChange = () => {
+                if (document.hidden) {
+                    // 页面变为隐藏，可能成功打开了App
+                    console.log('可能成功打开了App');
+                }
+            };
+            
+            document.addEventListener('visibilitychange', visibilityChange);
+            
+            // 设置超时，如果一段时间后页面还在前台，则跳转到应用商店
             setTimeout(() => {
                 document.body.removeChild(iframe);
+                document.removeEventListener('visibilitychange', visibilityChange);
                 
-                // 如果没有打开App，则尝试跳转到下载页面或网页版
-                if (fallbackUrl) {
-                    setTimeout(() => {
-                        window.location.href = fallbackUrl;
-                    }, 500);
+                // 如果页面仍然可见（没有跳转到App），则跳转到应用商店
+                if (!document.hidden && Date.now() - startTime < 2000) {
+                    if (storeUrl) {
+                        window.location.href = storeUrl;
+                    } else {
+                        // 如果没有应用商店链接，显示提示
+                        showMessage('提示', `请手动打开${getAppOpenInfo(activityData.platform).appName}App`);
+                    }
                 }
-            }, 2000);
+            }, 1500); // 1.5秒后检查
         }
         
         // 显示口令弹窗
@@ -937,14 +995,10 @@
             
             // 更新打开App按钮
             const openAppBtn = document.getElementById('openAppBtn');
-            if (appInfo.scheme) {
-                openAppBtn.style.display = 'inline-flex';
-                openAppBtn.onclick = () => {
-                    openApp(appInfo.scheme);
-                };
-            } else {
-                openAppBtn.style.display = 'none';
-            }
+            openAppBtn.style.display = 'inline-flex';
+            openAppBtn.onclick = () => {
+                tryOpenApp(appInfo.scheme, appInfo.storeUrl);
+            };
             
             // 显示弹窗
             document.getElementById('codeModal').classList.add('show');
@@ -953,10 +1007,15 @@
             setTimeout(() => {
                 copyToClipboard(code)
                     .then(() => {
-                        console.log('口令已自动复制');
+                        console.log('口令已自动复制到剪贴板');
                     })
                     .catch(err => {
                         console.error('自动复制失败:', err);
+                        // 如果自动复制失败，显示提示让用户手动复制
+                        const codeBox = document.getElementById('codeDisplay');
+                        codeBox.style.borderColor = '#dc3545';
+                        codeBox.style.backgroundColor = '#f8d7da';
+                        codeBox.nextElementSibling.textContent = '自动复制失败，请手动复制上方口令';
                     });
             }, 300);
         }
@@ -1034,11 +1093,11 @@
             document.getElementById('copyCodeBtn').addEventListener('click', function() {
                 copyToClipboard(currentCode)
                     .then(() => {
-                        showMessage('成功', '口令已复制到剪贴板');
+                        showMessage('成功', '口令已重新复制到剪贴板');
                     })
                     .catch(err => {
                         console.error('复制失败:', err);
-                        showMessage('提示', '复制失败，请手动选择并复制');
+                        showMessage('提示', '复制失败，请手动选择并复制上方口令');
                     });
             });
             
@@ -1120,15 +1179,6 @@
             
             const app = document.getElementById('app');
             
-            // 根据活动类型决定按钮文字
-            const buttonText = activityData.urlType === 'link' ? 
-                '前往官方活动页面' : 
-                '复制活动口令';
-            
-            const buttonIcon = activityData.urlType === 'link' ? 
-                'fas fa-external-link-alt' : 
-                'fas fa-copy';
-            
             // 根据是否在微信环境决定是否显示分享按钮
             const shareButtonHTML = isWeChat ? `
                 <button id="share-btn" class="btn btn-success">
@@ -1167,7 +1217,7 @@
                     
                     <div class="button-group">
                         <button id="official-btn" class="btn btn-primary">
-                            <i class="${buttonIcon}"></i> ${buttonText}
+                            <i class="fas fa-external-link-alt"></i> 前往官方活动页面
                         </button>
                         ${shareButtonHTML}
                         <a href="index.html" class="btn btn-secondary">
