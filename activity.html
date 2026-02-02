@@ -159,6 +159,36 @@
             top: -2px;
         }
         
+        /* 空状态卡片 */
+        .empty-state-card {
+            text-align: center;
+            padding: 60px 40px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border: 2px dashed #dee2e6;
+            margin: 20px 0;
+        }
+        
+        .empty-state-icon {
+            font-size: 3.5rem;
+            color: #adb5bd;
+            margin-bottom: 20px;
+        }
+        
+        .empty-state-title {
+            color: #495057;
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+        
+        .empty-state-text {
+            color: #6c757d;
+            font-size: 1.05rem;
+            max-width: 600px;
+            margin: 0 auto 25px;
+            line-height: 1.6;
+        }
+        
         /* 按钮组 */
         .button-group {
             display: flex;
@@ -201,6 +231,85 @@
         .btn-secondary:hover {
             background: #ffebee;
             transform: translateY(-2px);
+        }
+        
+        .btn-success {
+            background: linear-gradient(to right, #28a745, #20c997);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: linear-gradient(to right, #218838, #1da57c);
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        /* 消息弹窗 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        
+        .modal-header {
+            padding: 20px 30px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #6c757d;
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+        
+        .close-modal:hover {
+            background: #f8f9fa;
+            color: #333;
+        }
+        
+        .modal-body {
+            padding: 30px;
         }
         
         /* 页脚 */
@@ -267,6 +376,10 @@
                 width: 100%;
                 justify-content: center;
             }
+            
+            .empty-state-card {
+                padding: 40px 20px;
+            }
         }
     </style>
 </head>
@@ -276,6 +389,22 @@
         <div class="loading">
             <div class="loading-spinner"></div>
             <p>正在加载活动详情...</p>
+        </div>
+    </div>
+
+    <!-- 消息弹窗 -->
+    <div class="modal-overlay" id="messageModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="messageTitle">提示</div>
+                <button class="close-modal" id="closeMessageBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="messageContent">消息内容</p>
+                <div style="display: flex; gap: 15px; margin-top: 25px;">
+                    <button class="btn btn-primary" id="confirmMessageBtn" style="flex: 1;">确定</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -304,6 +433,8 @@
                 return;
             }
             
+            setupEventListeners();
+            
             try {
                 await loadActivityData();
                 renderPage();
@@ -312,6 +443,18 @@
                 showError('加载失败，请刷新页面重试');
             }
         });
+        
+        // 设置事件监听器
+        function setupEventListeners() {
+            // 弹窗事件
+            document.getElementById('closeMessageBtn').addEventListener('click', closeMessageModal);
+            document.getElementById('confirmMessageBtn').addEventListener('click', closeMessageModal);
+            
+            // 点击背景关闭弹窗
+            document.getElementById('messageModal').addEventListener('click', function(e) {
+                if (e.target === this) closeMessageModal();
+            });
+        }
         
         // 加载活动数据
         async function loadActivityData() {
@@ -385,9 +528,12 @@
                     </div>
                     
                     <div class="button-group">
-                        <a href="${activityData.officialUrl || '#'}" target="_blank" class="btn btn-primary">
+                        <button id="official-btn" class="btn btn-primary">
                             <i class="fas fa-external-link-alt"></i> 前往官方活动页面
-                        </a>
+                        </button>
+                        <button id="share-btn" class="btn btn-success">
+                            <i class="fas fa-share-alt"></i> 分享给好友
+                        </button>
                         <a href="index.html" class="btn btn-secondary">
                             <i class="fas fa-arrow-left"></i> 返回首页
                         </a>
@@ -408,6 +554,9 @@
             
             // 渲染活动详情
             renderActivityDetail();
+            
+            // 绑定按钮事件
+            bindButtonEvents();
         }
         
         // 渲染活动详情
@@ -415,52 +564,114 @@
             const container = document.getElementById('activity-content');
             if (!container) return;
             
-            if (activityData.detail) {
+            if (activityData.detail && activityData.detail.content) {
                 // 如果有详细内容，使用详细内容
-                container.innerHTML = activityData.detail.content || `
-                    <div class="content-section">
-                        <h3>活动介绍</h3>
-                        <p>${activityData.activityDesc}</p>
-                    </div>
-                    <div class="content-section">
-                        <h3>活动时间</h3>
-                        <p>2026年1月20日 - 2月15日</p>
-                    </div>
-                    <div class="content-section">
-                        <h3>参与方式</h3>
-                        <p>请点击上方按钮前往官方活动页面参与</p>
-                    </div>
-                `;
+                container.innerHTML = activityData.detail.content;
             } else {
-                // 使用默认内容
+                // 显示空状态卡片
                 container.innerHTML = `
-                    <div class="content-section">
-                        <h3>活动介绍</h3>
-                        <p>${activityData.activityDesc}</p>
-                    </div>
-                    <div class="content-section">
-                        <h3>活动时间</h3>
-                        <p>2026年1月20日 - 2月15日</p>
-                    </div>
-                    <div class="content-section">
-                        <h3>参与方式</h3>
-                        <ul>
-                            <li>点击上方"前往官方活动页面"按钮</li>
-                            <li>按照页面提示参与活动</li>
-                            <li>分享活动给好友可获得额外奖励</li>
-                        </ul>
-                    </div>
-                    <div class="content-section">
-                        <h3>注意事项</h3>
-                        <ul>
-                            <li>请确保使用最新版本App参与活动</li>
-                            <li>活动奖励需在有效期内领取</li>
-                            <li>请勿相信任何非官方的中奖信息</li>
-                            <li>如有疑问，请咨询官方客服</li>
-                        </ul>
+                    <div class="empty-state-card">
+                        <div class="empty-state-icon">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <h3 class="empty-state-title">内容正在准备中</h3>
+                        <p class="empty-state-text">
+                            该活动的详细内容还没有上传，请耐心等待。<br>
+                            我们会尽快更新活动详情，敬请期待！
+                        </p>
+                        <div style="margin-top: 20px;">
+                            <a href="index.html" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> 返回首页查看其他活动
+                            </a>
+                        </div>
                     </div>
                 `;
             }
+        }
+        
+        // 绑定按钮事件
+        function bindButtonEvents() {
+            // 官方活动页面按钮
+            const officialBtn = document.getElementById('official-btn');
+            if (officialBtn) {
+                officialBtn.addEventListener('click', function() {
+                    if (activityData.officialUrl && activityData.officialUrl.trim() !== '') {
+                        window.open(activityData.officialUrl, '_blank');
+                    } else {
+                        showMessage('提示', '该活动暂未配置官方页面，请稍后再试。');
+                    }
+                });
+            }
+            
+            // 分享按钮
+            const shareBtn = document.getElementById('share-btn');
+            if (shareBtn) {
+                shareBtn.addEventListener('click', shareActivity);
+            }
+        }
+        
+        // 分享活动
+        function shareActivity() {
+            const currentUrl = window.location.href;
+            const activityTitle = activityData.activityTitle || '春节活动';
+            const platform = activityData.platform || '';
+            
+            // 创建分享文本
+            let shareText = `【马年迎春】${platform} - ${activityTitle}\n`;
+            shareText += `${activityData.activityDesc || '快来参与春节活动，赢取大奖！'}\n`;
+            shareText += `点击链接查看详情：${currentUrl}`;
+            
+            // 尝试使用Web Share API（支持部分现代浏览器）
+            if (navigator.share) {
+                navigator.share({
+                    title: `${platform} - ${activityTitle}`,
+                    text: shareText,
+                    url: currentUrl,
+                })
+                .then(() => console.log('分享成功'))
+                .catch((error) => {
+                    console.log('Web Share失败，使用复制方式:', error);
+                    copyToClipboard(shareText);
+                });
+            } else {
+                // 回退方案：复制到剪贴板
+                copyToClipboard(shareText);
+            }
+        }
+        
+        // 复制文本到剪贴板
+        function copyToClipboard(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showMessage('分享提示', '活动链接已复制到剪贴板！\n\n您可以：\n1. 打开微信\n2. 粘贴给好友\n3. 邀请好友一起参与活动');
+                } else {
+                    showMessage('分享提示', '请手动复制以下链接分享给好友：\n\n' + text);
+                }
+            } catch (err) {
+                showMessage('分享提示', '请手动复制以下链接分享给好友：\n\n' + text);
+            }
+            
+            document.body.removeChild(textarea);
+        }
+        
+        // 显示消息弹窗
+        function showMessage(title, content) {
+            document.getElementById('messageTitle').textContent = title;
+            document.getElementById('messageContent').innerHTML = content.replace(/\n/g, '<br>');
+            document.getElementById('messageModal').classList.add('show');
+        }
+        
+        // 关闭消息弹窗
+        function closeMessageModal() {
+            document.getElementById('messageModal').classList.remove('show');
         }
         
         // 显示错误
