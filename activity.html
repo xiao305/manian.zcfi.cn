@@ -868,21 +868,10 @@
                 <div class="container">
                     <div class="activity-content" id="activity-content">
                         <!-- 活动详情内容将通过JavaScript动态生成 -->
-                        <div class="content-section">
-                            <h3>活动介绍</h3>
-                            <p>${activityData.activityDesc}</p>
-                        </div>
-                        <div class="content-section">
-                            <h3>活动时间</h3>
-                            <p>2026年1月20日 - 2月15日</p>
-                        </div>
-                        <div class="content-section">
-                            <h3>参与方式</h3>
-                            <ul>
-                                <li>点击下方"前往官方活动页面"按钮</li>
-                                <li>按照页面提示参与活动</li>
-                                <li>分享活动给好友可获得额外奖励</li>
-                            </ul>
+                        <!-- 初始加载时显示加载状态或空状态 -->
+                        <div class="loading">
+                            <div class="loading-spinner"></div>
+                            <p>正在加载活动详情...</p>
                         </div>
                     </div>
                     
@@ -911,6 +900,42 @@
             
             // 绑定按钮事件
             bindButtonEvents();
+            
+            // 检查是否已经有详情内容，如果没有则显示空状态
+            checkAndRenderContent();
+        }
+        
+        // 检查并渲染内容
+        function checkAndRenderContent() {
+            const container = document.getElementById('activity-content');
+            if (!container) return;
+            
+            // 延迟一小段时间检查，确保异步加载的内容有机会完成
+            setTimeout(() => {
+                if (activityData.detail && activityData.detail.content) {
+                    // 如果有详细内容，使用详细内容
+                    container.innerHTML = activityData.detail.content;
+                } else {
+                    // 显示空状态卡片
+                    container.innerHTML = `
+                        <div class="empty-state-card">
+                            <div class="empty-state-icon">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
+                            <h3 class="empty-state-title">内容正在准备中</h3>
+                            <p class="empty-state-text">
+                                该活动的详细内容还没有上传，请耐心等待。<br>
+                                我们会尽快更新活动详情，敬请期待！
+                            </p>
+                            <div style="margin-top: 20px;">
+                                <a href="index.html" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left"></i> 返回首页查看其他活动
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                }
+            }, 300); // 延迟300ms，确保异步加载有机会完成
         }
         
         // 绑定按钮事件
