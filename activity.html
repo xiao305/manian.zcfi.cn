@@ -540,6 +540,23 @@
             background: linear-gradient(to right, #0069d9, #004a99);
         }
         
+        /* 设备检测提示 */
+        .device-tip {
+            background: #e7f3ff;
+            border: 1px solid #b8daff;
+            border-radius: 6px;
+            padding: 12px 15px;
+            margin-top: 15px;
+            font-size: 13px;
+            color: #004085;
+            text-align: left;
+        }
+        
+        .device-tip i {
+            color: #007bff;
+            margin-right: 8px;
+        }
+        
         /* 页脚 */
         footer {
             text-align: center;
@@ -627,6 +644,11 @@
             .code-warning {
                 padding: 12px;
                 font-size: 13px;
+            }
+            
+            .device-tip {
+                padding: 10px;
+                font-size: 12px;
             }
         }
         
@@ -719,6 +741,11 @@
                 <div class="code-box" id="codeDisplay">
                     <!-- 口令内容将显示在这里 -->
                 </div>
+                
+                <div id="deviceTip" class="device-tip" style="display: none;">
+                    <!-- 设备检测提示将在这里动态显示 -->
+                </div>
+                
                 <div class="button-group" style="margin-top: 25px;">
                     <button class="btn btn-primary copy-code-btn" id="copyCodeBtn">
                         <i class="fas fa-copy"></i> 重新复制口令
@@ -766,6 +793,19 @@
             return ua.indexOf('micromessenger') !== -1;
         }
         
+        // 检测设备类型
+        function getDeviceType() {
+            const ua = navigator.userAgent;
+            
+            if (/iphone|ipad|ipod/i.test(ua)) {
+                return 'ios';
+            } else if (/android/i.test(ua)) {
+                return 'android';
+            } else {
+                return 'other';
+            }
+        }
+        
         // 检测输入的是链接还是口令
         function detectUrlType(input) {
             if (!input || input.trim() === '') {
@@ -788,6 +828,7 @@
         let activityId = null;
         let isWeChat = false;
         let currentCode = '';
+        let deviceType = null;
         
         // 设置页面标题
         function setPageTitle(title) {
@@ -877,71 +918,127 @@
         function getAppOpenInfo(platform) {
             const platformMap = {
                 '支付宝': { 
-                    scheme: 'alipays://', 
-                    appName: '支付宝',
-                    package: 'com.eg.android.AlipayGphone',
-                    storeUrl: 'https://apps.apple.com/cn/app/%E6%94%AF%E4%BB%98%E5%AE%9D-%E8%81%9A%E5%AE%9D%E5%A4%8D%E5%88%9B%E6%9B%B4%E5%A5%BD%E7%9A%84%E6%94%AF%E4%BB%98%E5%AE%9D/id333206289'
+                    iosScheme: 'alipays://', 
+                    iosStoreUrl: 'https://apps.apple.com/cn/app/%E6%94%AF%E4%BB%98%E5%AE%9D-%E8%81%9A%E5%AE%9D%E5%A4%8D%E5%88%9B%E6%9B%B4%E5%A5%BD%E7%9A%84%E6%94%AF%E4%BB%98%E5%AE%9D/id333206289',
+                    androidScheme: 'alipays://',
+                    androidPackage: 'com.eg.android.AlipayGphone',
+                    androidMarketUrl: 'https://a.app.qq.com/o/simple.jsp?pkgname=com.eg.android.AlipayGphone',
+                    appName: '支付宝'
                 },
                 '微信': { 
-                    scheme: 'weixin://', 
-                    appName: '微信',
-                    package: 'com.tencent.mm',
-                    storeUrl: 'https://apps.apple.com/cn/app/%E5%BE%AE%E4%BF%A1/id414478124'
+                    iosScheme: 'weixin://', 
+                    iosStoreUrl: 'https://apps.apple.com/cn/app/%E5%BE%AE%E4%BF%A1/id414478124',
+                    androidScheme: 'weixin://',
+                    androidPackage: 'com.tencent.mm',
+                    androidMarketUrl: 'https://a.app.qq.com/o/simple.jsp?pkgname=com.tencent.mm',
+                    appName: '微信'
                 },
                 '淘宝': { 
-                    scheme: 'taobao://', 
-                    appName: '淘宝',
-                    package: 'com.taobao.taobao',
-                    storeUrl: 'https://apps.apple.com/cn/app/%E6%B7%98%E5%AE%9D-%E7%9C%8B%E6%88%91%E6%94%B6%E8%97%8F%E7%9A%84%E4%B8%96%E7%95%8C/id387682726'
+                    iosScheme: 'taobao://', 
+                    iosStoreUrl: 'https://apps.apple.com/cn/app/%E6%B7%98%E5%AE%9D-%E7%9C%8B%E6%88%91%E6%94%B6%E8%97%8F%E7%9A%84%E4%B8%96%E7%95%8C/id387682726',
+                    androidScheme: 'taobao://',
+                    androidPackage: 'com.taobao.taobao',
+                    androidMarketUrl: 'https://a.app.qq.com/o/simple.jsp?pkgname=com.taobao.taobao',
+                    appName: '淘宝'
                 },
                 '抖音': { 
-                    scheme: 'snssdk1128://', 
-                    appName: '抖音',
-                    package: 'com.ss.android.ugc.aweme',
-                    storeUrl: 'https://apps.apple.com/cn/app/%E6%8A%96%E9%9F%B3-%E8%AE%B0%E5%BD%95%E7%9C%9F%E5%AE%9E%E7%94%9F%E6%B4%BB/id1142110895'
+                    iosScheme: 'snssdk1128://', 
+                    iosStoreUrl: 'https://apps.apple.com/cn/app/%E6%8A%96%E9%9F%B3-%E8%AE%B0%E5%BD%95%E7%9C%9F%E5%AE%9E%E7%94%9F%E6%B4%BB/id1142110895',
+                    androidScheme: 'snssdk1128://',
+                    androidPackage: 'com.ss.android.ugc.aweme',
+                    androidMarketUrl: 'https://a.app.qq.com/o/simple.jsp?pkgname=com.ss.android.ugc.aweme',
+                    appName: '抖音'
                 },
                 '京东': { 
-                    scheme: 'openapp.jdmoble://', 
-                    appName: '京东',
-                    package: 'com.jingdong.app.mall',
-                    storeUrl: 'https://apps.apple.com/cn/app/%E4%BA%AC%E4%B8%9C-%E5%A4%9A%E5%BF%AB%E5%A5%BD%E7%9C%81/id414245413'
+                    iosScheme: 'openapp.jdmoble://', 
+                    iosStoreUrl: 'https://apps.apple.com/cn/app/%E4%BA%AC%E4%B8%9C-%E5%A4%9A%E5%BF%AB%E5%A5%BD%E7%9C%81/id414245413',
+                    androidScheme: 'openapp.jdmoble://',
+                    androidPackage: 'com.jingdong.app.mall',
+                    androidMarketUrl: 'https://a.app.qq.com/o/simple.jsp?pkgname=com.jingdong.app.mall',
+                    appName: '京东'
                 },
                 '拼多多': { 
-                    scheme: 'pinduoduo://', 
-                    appName: '拼多多',
-                    package: 'com.xunmeng.pinduoduo',
-                    storeUrl: 'https://apps.apple.com/cn/app/%E6%8B%BC%E5%A4%9A%E5%A4%9A-%E5%A4%9A%E5%A4%9A%E4%B9%B0%E8%8F%9C%E5%A4%9A%E5%A4%9A%E4%BC%98%E9%80%89/id1044283059'
+                    iosScheme: 'pinduoduo://', 
+                    iosStoreUrl: 'https://apps.apple.com/cn/app/%E6%8B%BC%E5%A4%9A%E5%A4%9A-%E5%A4%9A%E5%A4%9A%E4%B9%B0%E8%8F%9C%E5%A4%9A%E5%A4%9A%E4%BC%98%E9%80%89/id1044283059',
+                    androidScheme: 'pinduoduo://',
+                    androidPackage: 'com.xunmeng.pinduoduo',
+                    androidMarketUrl: 'https://a.app.qq.com/o/simple.jsp?pkgname=com.xunmeng.pinduoduo',
+                    appName: '拼多多'
                 },
                 '微博': { 
-                    scheme: 'sinaweibo://', 
-                    appName: '微博',
-                    package: 'com.sina.weibo',
-                    storeUrl: 'https://apps.apple.com/cn/app/%E5%BE%AE%E5%8D%9A/id350962117'
+                    iosScheme: 'sinaweibo://', 
+                    iosStoreUrl: 'https://apps.apple.com/cn/app/%E5%BE%AE%E5%8D%9A/id350962117',
+                    androidScheme: 'sinaweibo://',
+                    androidPackage: 'com.sina.weibo',
+                    androidMarketUrl: 'https://a.app.qq.com/o/simple.jsp?pkgname=com.sina.weibo',
+                    appName: '微博'
                 },
                 '百度': { 
-                    scheme: 'baiduboxapp://', 
-                    appName: '百度',
-                    package: 'com.baidu.searchbox',
-                    storeUrl: 'https://apps.apple.com/cn/app/%E7%99%BE%E5%BA%A6/id382201985'
+                    iosScheme: 'baiduboxapp://', 
+                    iosStoreUrl: 'https://apps.apple.com/cn/app/%E7%99%BE%E5%BA%A6/id382201985',
+                    androidScheme: 'baiduboxapp://',
+                    androidPackage: 'com.baidu.searchbox',
+                    androidMarketUrl: 'https://a.app.qq.com/o/simple.jsp?pkgname=com.baidu.searchbox',
+                    appName: '百度'
                 }
             };
             
             // 默认值
             return platformMap[platform] || { 
-                scheme: null, 
-                appName: platform,
-                package: null,
-                storeUrl: null
+                iosScheme: null, 
+                iosStoreUrl: null,
+                androidScheme: null,
+                androidPackage: null,
+                androidMarketUrl: null,
+                appName: platform
             };
         }
         
-        // 尝试打开App
-        function tryOpenApp(scheme, storeUrl) {
+        // 显示设备检测提示
+        function showDeviceTip() {
+            const deviceTip = document.getElementById('deviceTip');
+            deviceTip.style.display = 'block';
+            
+            if (deviceType === 'ios') {
+                deviceTip.innerHTML = `
+                    <i class="fas fa-mobile-alt"></i>
+                    <strong>iOS用户：</strong>点击"打开对应App"按钮将尝试打开App，如果未安装则会跳转到App Store下载页面。
+                `;
+            } else if (deviceType === 'android') {
+                deviceTip.innerHTML = `
+                    <i class="fas fa-mobile-alt"></i>
+                    <strong>安卓用户：</strong>点击"打开对应App"按钮将尝试打开App，如果未安装则会跳转到应用市场下载页面。
+                `;
+            } else {
+                deviceTip.innerHTML = `
+                    <i class="fas fa-mobile-alt"></i>
+                    <strong>提示：</strong>点击"打开对应App"按钮将尝试打开对应应用程序。
+                `;
+            }
+        }
+        
+        // 尝试打开App - 根据设备类型使用不同方法
+        function tryOpenApp(platform) {
+            const appInfo = getAppOpenInfo(platform);
+            let scheme = null;
+            let fallbackUrl = null;
+            
+            // 根据设备类型选择对应的Scheme和备用链接
+            if (deviceType === 'ios') {
+                scheme = appInfo.iosScheme;
+                fallbackUrl = appInfo.iosStoreUrl;
+            } else if (deviceType === 'android') {
+                scheme = appInfo.androidScheme;
+                fallbackUrl = appInfo.androidMarketUrl;
+            } else {
+                // 其他设备，优先使用iOS方案
+                scheme = appInfo.iosScheme;
+                fallbackUrl = appInfo.iosStoreUrl || appInfo.androidMarketUrl;
+            }
+            
             if (!scheme) {
-                // 如果没有scheme，直接跳转到应用商店
-                if (storeUrl) {
-                    window.location.href = storeUrl;
-                }
+                // 如果没有对应的Scheme，显示提示
+                showMessage('提示', `无法直接打开${appInfo.appName}，请确保已安装该应用。`);
                 return;
             }
             
@@ -965,18 +1062,19 @@
             
             document.addEventListener('visibilitychange', visibilityChange);
             
-            // 设置超时，如果一段时间后页面还在前台，则跳转到应用商店
+            // 设置超时，如果一段时间后页面还在前台，则跳转到备用链接
             setTimeout(() => {
                 document.body.removeChild(iframe);
                 document.removeEventListener('visibilitychange', visibilityChange);
                 
-                // 如果页面仍然可见（没有跳转到App），则跳转到应用商店
+                // 如果页面仍然可见（没有跳转到App），则跳转到备用链接
                 if (!document.hidden && Date.now() - startTime < 2000) {
-                    if (storeUrl) {
-                        window.location.href = storeUrl;
+                    if (fallbackUrl) {
+                        // 跳转到应用商店/市场
+                        window.location.href = fallbackUrl;
                     } else {
-                        // 如果没有应用商店链接，显示提示
-                        showMessage('提示', `请手动打开${getAppOpenInfo(activityData.platform).appName}App`);
+                        // 如果没有备用链接，显示提示
+                        showMessage('提示', `请手动打开${appInfo.appName}App`);
                     }
                 }
             }, 1500); // 1.5秒后检查
@@ -985,6 +1083,7 @@
         // 显示口令弹窗
         function showCodeModal(code, platform) {
             currentCode = code;
+            deviceType = getDeviceType();
             
             // 获取平台信息
             const appInfo = getAppOpenInfo(platform);
@@ -997,8 +1096,11 @@
             const openAppBtn = document.getElementById('openAppBtn');
             openAppBtn.style.display = 'inline-flex';
             openAppBtn.onclick = () => {
-                tryOpenApp(appInfo.scheme, appInfo.storeUrl);
+                tryOpenApp(platform);
             };
+            
+            // 显示设备检测提示
+            showDeviceTip();
             
             // 显示弹窗
             document.getElementById('codeModal').classList.add('show');
@@ -1048,6 +1150,10 @@
         document.addEventListener('DOMContentLoaded', async function() {
             activityId = getUrlParam('id');
             isWeChat = isWeChatBrowser();
+            deviceType = getDeviceType();
+            
+            console.log('设备类型:', deviceType);
+            console.log('是否在微信中:', isWeChat);
             
             if (!activityId) {
                 showError('未指定活动ID');
