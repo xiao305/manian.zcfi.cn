@@ -3,21 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- 标题将通过JavaScript动态设置 -->
-    <title>活动详情 - 春节马年活动导航</title>
+    
+    <!-- 关键：在页面加载前就设置好基础的Open Graph信息 -->
+    <!-- 这样即使JS加载失败，微信爬虫也能获取到基本信息 -->
+    <title>春节马年活动详情</title>
     
     <!-- 安全相关meta标签 -->
     <meta name="referrer" content="no-referrer">
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
     
-    <!-- 关键：微信分享必须的 meta 标签 -->
-    <!-- 这些标签必须直接在HTML中（不是JS动态生成） -->
+    <!-- 关键：静态的Open Graph标签，确保微信爬虫能立即获取 -->
     <meta property="og:type" content="website">
-    <meta property="og:site_name" content="马年迎春 - 春节活动导航">
+    <meta property="og:site_name" content="马年迎春">
     <meta property="og:title" content="春节马年活动详情">
-    <meta property="og:description" content="2026甲午马年各大平台春节活动一站式导航">
+    <meta property="og:description" content="2026甲午马年各大平台春节活动一站式导航，集五福、抢红包、赢大奖！">
     <meta property="og:url" content="">
     <meta property="og:image" content="https://gist.githubusercontent.com/xiao305/46c7b1ebed1b795be23a33c149d6de62/raw/share-image.jpg">
+    <meta property="og:image:type" content="image/jpeg">
     <meta property="og:image:width" content="300">
     <meta property="og:image:height" content="300">
     
@@ -29,7 +31,7 @@
     <!-- 其他分享协议 -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="春节马年活动详情">
-    <meta name="twitter:description" content="2026甲午马年各大平台春节活动一站式导航">
+    <meta name="twitter:description" content="2026甲午马年各大平台春节活动一站式导航，集五福、抢红包、赢大奖！">
     <meta name="twitter:image" content="https://gist.githubusercontent.com/xiao305/46c7b1ebed1b795be23a33c149d6de62/raw/share-image.jpg">
     
     <!-- 图标 -->
@@ -37,13 +39,17 @@
     <link rel="icon" type="image/png" sizes="96x96" href="favicon/favicon-96x96.png">
     <link rel="icon" type="image/x-icon" href="favicon/favicon.ico">
     
+    <!-- 预加载关键资源 -->
+    <link rel="preconnect" href="https://gist.githubusercontent.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com/ajax/libs">
+    
     <!-- 字体图标 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <!-- 字体 -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
     
-    <!-- 样式 -->
     <style>
         /* ... 保持所有原有样式不变 ... */
         * {
@@ -59,6 +65,7 @@
             line-height: 1.6;
             background-image: linear-gradient(135deg, #fff8f8 0%, #fff 100%);
             min-height: 100vh;
+            overflow-x: hidden;
         }
         
         .container {
@@ -554,15 +561,29 @@
                 font-size: 35px;
             }
         }
+        
+        /* 隐藏内容直到JS加载完成 */
+        .js-hidden {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
-    <div id="app">
+    <!-- 隐藏默认内容，直到JS加载完成 -->
+    <div id="app" class="js-hidden">
         <!-- 内容将通过JavaScript动态加载 -->
         <div class="loading">
             <div class="loading-spinner"></div>
             <p>正在加载活动详情...</p>
         </div>
+    </div>
+    
+    <!-- 关键的静态内容，确保微信爬虫能抓取到 -->
+    <!-- 这部分内容不会显示给用户，但微信爬虫能抓取到 -->
+    <div style="display: none;">
+        <h1 id="share-title">春节马年活动详情</h1>
+        <p id="share-description">2026甲午马年各大平台春节活动一站式导航，集五福、抢红包、赢大奖！</p>
+        <img id="share-image" src="https://gist.githubusercontent.com/xiao305/46c7b1ebed1b795be23a33c149d6de62/raw/share-image.jpg" alt="春节活动分享图">
     </div>
 
     <!-- 微信分享引导弹窗 -->
@@ -616,6 +637,21 @@
 
     <!-- 主脚本 -->
     <script>
+        // 立即执行的函数，尽快设置Open Graph信息
+        (function() {
+            // 设置当前的页面URL（不包含查询参数）
+            const currentUrl = window.location.origin + window.location.pathname;
+            
+            // 立即更新基础的OG标签
+            const ogUrl = document.querySelector('meta[property="og:url"]');
+            if (ogUrl) {
+                ogUrl.setAttribute('content', currentUrl);
+            }
+            
+            // 显示页面内容
+            document.getElementById('app').classList.remove('js-hidden');
+        })();
+        
         // 配置
         const CONFIG_GIST_ID = '46c7b1ebed1b795be23a33c149d6de62';
         const CONFIG_RAW_URL = `https://gist.githubusercontent.com/xiao305/${CONFIG_GIST_ID}/raw/manian-index.json`;
@@ -644,52 +680,52 @@
             document.title = title + ' - 活动详情';
         }
         
-        // 关键：更新微信分享信息
+        // 更新微信分享信息 - 简化版本，确保快速执行
         function updateWechatShareInfo(title, description, imageUrl) {
-            // 重要：更新所有分享相关的meta标签
-            const ogTags = {
-                'og:title': `${title} - 活动详情`,
-                'og:description': description,
-                'og:url': window.location.href,
-                'og:image': imageUrl,
-                'twitter:title': `${title} - 活动详情`,
-                'twitter:description': description,
-                'twitter:image': imageUrl
-            };
-            
-            // 更新所有meta标签
-            Object.keys(ogTags).forEach(property => {
-                const meta = document.querySelector(`meta[property="${property}"], meta[name="${property}"]`);
-                if (meta) {
-                    meta.setAttribute('content', ogTags[property]);
+            try {
+                // 简化描述，移除HTML标签，限制长度
+                const cleanDesc = description
+                    .replace(/<[^>]*>/g, '') // 移除HTML标签
+                    .substring(0, 100); // 限制长度
+                
+                // 设置Open Graph标签
+                const metas = [
+                    { selector: 'meta[property="og:title"]', value: `${title} - 活动详情` },
+                    { selector: 'meta[property="og:description"]', value: cleanDesc },
+                    { selector: 'meta[property="og:url"]', value: window.location.href },
+                    { selector: 'meta[property="og:image"]', value: imageUrl },
+                    { selector: 'meta[name="twitter:title"]', value: `${title} - 活动详情` },
+                    { selector: 'meta[name="twitter:description"]', value: cleanDesc },
+                    { selector: 'meta[name="twitter:image"]', value: imageUrl }
+                ];
+                
+                metas.forEach(meta => {
+                    const element = document.querySelector(meta.selector);
+                    if (element) {
+                        element.setAttribute('content', meta.value);
+                    }
+                });
+                
+                // 更新隐藏的静态内容，确保微信爬虫能抓取到
+                const shareTitle = document.getElementById('share-title');
+                const shareDesc = document.getElementById('share-description');
+                const shareImg = document.getElementById('share-image');
+                
+                if (shareTitle) shareTitle.textContent = `${title} - 活动详情`;
+                if (shareDesc) shareDesc.textContent = cleanDesc;
+                if (shareImg) shareImg.src = imageUrl;
+                
+                // 也更新常规的description标签
+                let descMeta = document.querySelector('meta[name="description"]');
+                if (!descMeta) {
+                    descMeta = document.createElement('meta');
+                    descMeta.name = 'description';
+                    document.head.appendChild(descMeta);
                 }
-            });
-            
-            // 也更新常规的description标签
-            let descMeta = document.querySelector('meta[name="description"]');
-            if (!descMeta) {
-                descMeta = document.createElement('meta');
-                descMeta.name = 'description';
-                document.head.appendChild(descMeta);
-            }
-            descMeta.setAttribute('content', description);
-            
-            // 关键：微信需要特殊的处理方式
-            // 1. 强制设置URL（添加时间戳避免缓存）
-            const shareUrl = window.location.href.split('#')[0] + '?t=' + Date.now();
-            const urlMeta = document.querySelector('meta[property="og:url"]');
-            if (urlMeta) {
-                urlMeta.setAttribute('content', shareUrl);
-            }
-            
-            // 2. 确保图片URL是完整的HTTPS
-            if (!imageUrl.startsWith('http')) {
-                imageUrl = window.location.origin + (imageUrl.startsWith('/') ? '' : '/') + imageUrl;
-            }
-            
-            const imageMeta = document.querySelector('meta[property="og:image"]');
-            if (imageMeta) {
-                imageMeta.setAttribute('content', imageUrl);
+                descMeta.setAttribute('content', cleanDesc);
+                
+            } catch (error) {
+                console.warn('更新分享信息失败:', error);
             }
         }
         
@@ -706,16 +742,9 @@
             setupEventListeners();
             
             try {
+                // 立即加载活动数据，不等待其他资源
                 await loadActivityData();
                 renderPage();
-                
-                // 关键：检测是否微信，如果是，输出调试信息
-                if (isWeChat) {
-                    console.log('微信环境检测到，分享信息已设置:');
-                    console.log('标题:', activityData.activityTitle);
-                    console.log('描述:', activityData.activityDesc);
-                    console.log('图片:', DEFAULT_SHARE_IMAGE);
-                }
                 
             } catch (error) {
                 console.error('页面初始化失败:', error);
@@ -746,6 +775,7 @@
         // 加载活动数据
         async function loadActivityData() {
             try {
+                // 使用无缓存的请求
                 const response = await fetch(CONFIG_RAW_URL + '?t=' + Date.now());
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}`);
@@ -760,19 +790,27 @@
                 
                 activityData = activity;
                 
-                // 如果有活动详情，加载详情
+                // 如果有活动详情，加载详情（非阻塞）
                 if (activity.detailGistId) {
-                    try {
-                        const detailResponse = await fetch(
-                            `https://gist.githubusercontent.com/xiao305/${activity.detailGistId}/raw/activity-detail.json?t=${Date.now()}`
-                        );
-                        if (detailResponse.ok) {
-                            const detailData = await detailResponse.json();
-                            activityData.detail = detailData;
+                    setTimeout(async () => {
+                        try {
+                            const detailResponse = await fetch(
+                                `https://gist.githubusercontent.com/xiao305/${activity.detailGistId}/raw/activity-detail.json?t=${Date.now()}`
+                            );
+                            if (detailResponse.ok) {
+                                const detailData = await detailResponse.json();
+                                activityData.detail = detailData;
+                                
+                                // 如果有新内容，更新页面
+                                const container = document.getElementById('activity-content');
+                                if (container && detailData.content) {
+                                    container.innerHTML = detailData.content;
+                                }
+                            }
+                        } catch (detailError) {
+                            console.warn('加载活动详情失败:', detailError);
                         }
-                    } catch (detailError) {
-                        console.warn('加载活动详情失败:', detailError);
-                    }
+                    }, 0);
                 }
                 
             } catch (error) {
@@ -791,7 +829,7 @@
             // 设置页面标题
             setPageTitle(activityData.activityTitle);
             
-            // 关键：立即更新微信分享信息
+            // 立即更新微信分享信息 - 这是关键步骤
             const shareDescription = activityData.activityDesc || '2026甲午马年春节活动，快来参与赢取大奖！';
             updateWechatShareInfo(
                 activityData.activityTitle, 
@@ -830,6 +868,22 @@
                 <div class="container">
                     <div class="activity-content" id="activity-content">
                         <!-- 活动详情内容将通过JavaScript动态生成 -->
+                        <div class="content-section">
+                            <h3>活动介绍</h3>
+                            <p>${activityData.activityDesc}</p>
+                        </div>
+                        <div class="content-section">
+                            <h3>活动时间</h3>
+                            <p>2026年1月20日 - 2月15日</p>
+                        </div>
+                        <div class="content-section">
+                            <h3>参与方式</h3>
+                            <ul>
+                                <li>点击下方"前往官方活动页面"按钮</li>
+                                <li>按照页面提示参与活动</li>
+                                <li>分享活动给好友可获得额外奖励</li>
+                            </ul>
+                        </div>
                     </div>
                     
                     <div class="button-group">
@@ -855,41 +909,8 @@
                 </footer>
             `;
             
-            // 渲染活动详情
-            renderActivityDetail();
-            
             // 绑定按钮事件
             bindButtonEvents();
-        }
-        
-        // 渲染活动详情
-        function renderActivityDetail() {
-            const container = document.getElementById('activity-content');
-            if (!container) return;
-            
-            if (activityData.detail && activityData.detail.content) {
-                // 如果有详细内容，使用详细内容
-                container.innerHTML = activityData.detail.content;
-            } else {
-                // 显示空状态卡片
-                container.innerHTML = `
-                    <div class="empty-state-card">
-                        <div class="empty-state-icon">
-                            <i class="fas fa-file-alt"></i>
-                        </div>
-                        <h3 class="empty-state-title">内容正在准备中</h3>
-                        <p class="empty-state-text">
-                            该活动的详细内容还没有上传，请耐心等待。<br>
-                            我们会尽快更新活动详情，敬请期待！
-                        </p>
-                        <div style="margin-top: 20px;">
-                            <a href="index.html" class="btn btn-secondary">
-                                <i class="fas fa-arrow-left"></i> 返回首页查看其他活动
-                            </a>
-                        </div>
-                    </div>
-                `;
-            }
         }
         
         // 绑定按钮事件
