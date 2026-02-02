@@ -218,12 +218,25 @@
         /* 操作按钮 */
         .action-buttons {
             display: flex;
-            gap: 8px;
+            gap: 5px;
+            flex-wrap: wrap;
         }
         
         .btn-sm {
-            padding: 6px 12px;
+            padding: 6px 10px;
             font-size: 12px;
+            min-width: 32px;
+            justify-content: center;
+        }
+        
+        .btn-move {
+            min-width: 32px;
+            padding: 6px 8px;
+        }
+        
+        .btn-move:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
         
         /* 表单弹窗 */
@@ -411,6 +424,29 @@
             border-color: #d32f2f;
             background: #ffebee;
             color: #d32f2f;
+        }
+        
+        /* URL类型指示器 */
+        .url-type-indicator {
+            margin-top: 5px;
+            font-size: 12px;
+        }
+        
+        .url-type-label {
+            display: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        
+        .url-type-link {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .url-type-code {
+            background: #fff3cd;
+            color: #856404;
         }
         
         /* 空状态 */
@@ -612,8 +648,12 @@
                     
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="officialUrl"><i class="fas fa-link"></i> 官方活动链接</label>
-                            <input type="url" id="officialUrl" class="form-control" placeholder="https://...">
+                            <label for="officialUrl"><i class="fas fa-link"></i> 官方活动链接或口令 *</label>
+                            <input type="text" id="officialUrl" class="form-control" required placeholder="例如: https://... 或 #抖音口令#">
+                            <small style="color: #666; font-size: 12px;">支持网页链接（以http/https开头）或活动口令</small>
+                            <div class="url-type-indicator">
+                                <span id="urlTypeLabel" class="url-type-label"></span>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label for="detailGistId"><i class="fas fa-file-alt"></i> 详情Gist ID</label>
@@ -809,6 +849,11 @@
                 document.getElementById('statusLabel').textContent = this.checked ? '启用' : '禁用';
             });
             
+            // URL输入监听
+            document.getElementById('officialUrl').addEventListener('input', function() {
+                updateUrlTypeIndicator(this.value);
+            });
+            
             // 点击背景关闭弹窗
             document.querySelectorAll('.modal-overlay').forEach(modal => {
                 modal.addEventListener('click', function(e) {
@@ -968,7 +1013,9 @@
                         icon: "fab fa-alipay",
                         activityTitle: "集五福·马上有福",
                         activityDesc: "2026年支付宝集五福活动全新升级，除了传统的AR扫福，新增马年专属福卡，最高可得666元红包。",
-                        enabled: true
+                        officialUrl: "https://alipay.com/activity",
+                        enabled: true,
+                        order: 0
                     },
                     {
                         id: "wechat",
@@ -976,7 +1023,9 @@
                         icon: "fab fa-weixin",
                         activityTitle: "马上有红包·视频号春节直播",
                         activityDesc: "微信视频号春节特别直播，红包封面免费领，直播期间红包雨不停，还可参与马年限定表情包活动。",
-                        enabled: true
+                        officialUrl: "https://weixin.qq.com/activity",
+                        enabled: true,
+                        order: 1
                     },
                     {
                         id: "taobao",
@@ -984,7 +1033,9 @@
                         icon: "fas fa-shopping-cart",
                         activityTitle: "年货节·马上过年",
                         activityDesc: "淘宝年货节马年特别版，百亿补贴再加码，除夕前每晚8点抢红包，还有马年限定商品专享优惠。",
-                        enabled: true
+                        officialUrl: "https://taobao.com/activity",
+                        enabled: true,
+                        order: 2
                     },
                     {
                         id: "douyin",
@@ -992,7 +1043,9 @@
                         icon: "fab fa-tiktok",
                         activityTitle: "新春放映厅·马上有戏",
                         activityDesc: "抖音春节放映厅活动，看视频抽红包，集卡分5亿，还有马年特效道具和拜年模板免费使用。",
-                        enabled: true
+                        officialUrl: "#抖音春节放映厅#",
+                        enabled: true,
+                        order: 3
                     }
                 ],
                 activityTimeline: [
@@ -1019,6 +1072,16 @@
                 `;
                 return;
             }
+            
+            // 确保每个活动都有order字段
+            activities.forEach((activity, index) => {
+                if (activity.order === undefined) {
+                    activity.order = index;
+                }
+            });
+            
+            // 按order排序
+            activities.sort((a, b) => (a.order || 0) - (b.order || 0));
             
             container.innerHTML = `
                 <table class="activities-table">
@@ -1052,6 +1115,12 @@
                                 </td>
                                 <td>
                                     <div class="action-buttons">
+                                        <button class="admin-btn btn-sm btn-secondary btn-move" onclick="moveActivity(${index}, -1)" ${index === 0 ? 'disabled' : ''}>
+                                            <i class="fas fa-arrow-up"></i>
+                                        </button>
+                                        <button class="admin-btn btn-sm btn-secondary btn-move" onclick="moveActivity(${index}, 1)" ${index === activities.length - 1 ? 'disabled' : ''}>
+                                            <i class="fas fa-arrow-down"></i>
+                                        </button>
                                         <button class="admin-btn btn-sm btn-secondary" onclick="editActivity(${index})">
                                             <i class="fas fa-edit"></i> 编辑
                                         </button>
@@ -1068,6 +1137,41 @@
                     </tbody>
                 </table>
             `;
+        }
+        
+        // 检测输入的是链接还是口令
+        function detectUrlType(input) {
+            if (!input || input.trim() === '') {
+                return 'empty';
+            }
+            
+            const url = input.trim();
+            // 检查是否是URL
+            const urlPattern = /^(https?:\/\/)?([\w\-]+\.)+[\w\-]+(\/[\w\- .\/?%&=]*)?$/i;
+            
+            if (urlPattern.test(url)) {
+                return 'link';
+            } else {
+                return 'code';
+            }
+        }
+        
+        // 更新链接类型指示器
+        function updateUrlTypeIndicator(input) {
+            const type = detectUrlType(input);
+            const label = document.getElementById('urlTypeLabel');
+            
+            if (type === 'empty') {
+                label.style.display = 'none';
+            } else if (type === 'link') {
+                label.style.display = 'inline-block';
+                label.textContent = '网页链接';
+                label.className = 'url-type-label url-type-link';
+            } else {
+                label.style.display = 'inline-block';
+                label.textContent = '活动口令';
+                label.className = 'url-type-label url-type-code';
+            }
         }
         
         // 打开活动弹窗
@@ -1087,17 +1191,10 @@
                 form.reset();
                 document.getElementById('activityEnabled').checked = true;
                 document.getElementById('statusLabel').textContent = '启用';
+                document.getElementById('urlTypeLabel').style.display = 'none';
                 
-                // 自动生成ID
-                const platformInput = document.getElementById('platform');
-                platformInput.addEventListener('input', function() {
-                    const platform = this.value || '';
-                    const id = platform.toLowerCase()
-                        .replace(/[^a-z0-9]/g, '-')
-                        .replace(/-+/g, '-')
-                        .replace(/^-|-$/g, '');
-                    document.getElementById('activityId').value = id || '';
-                });
+                // 移除平台名称自动生成ID的功能
+                // 平台名称和ID现在需要分别输入
             }
             
             modal.classList.add('show');
@@ -1121,6 +1218,9 @@
             document.getElementById('activityEnabled').checked = activity.enabled !== false;
             document.getElementById('statusLabel').textContent = activity.enabled !== false ? '启用' : '禁用';
             
+            // 更新链接类型指示器
+            updateUrlTypeIndicator(activity.officialUrl || '');
+            
             // 选择图标
             const icon = activity.icon || 'fas fa-globe';
             document.getElementById('selectedIcon').value = icon;
@@ -1143,11 +1243,13 @@
                 activityDesc: document.getElementById('activityDesc').value.trim(),
                 officialUrl: document.getElementById('officialUrl').value.trim(),
                 detailGistId: document.getElementById('detailGistId').value.trim(),
-                enabled: document.getElementById('activityEnabled').checked
+                enabled: document.getElementById('activityEnabled').checked,
+                // 添加链接类型字段，供前端使用
+                urlType: detectUrlType(document.getElementById('officialUrl').value.trim())
             };
             
             // 验证
-            if (!activity.id || !activity.platform || !activity.activityTitle || !activity.activityDesc) {
+            if (!activity.id || !activity.platform || !activity.activityTitle || !activity.activityDesc || !activity.officialUrl) {
                 showMessage('错误', '请填写所有必填字段');
                 return;
             }
@@ -1162,6 +1264,18 @@
             if (isEditing && activities.some((a, index) => a.id === activity.id && index !== editingIndex)) {
                 showMessage('错误', '活动ID已被其他活动使用');
                 return;
+            }
+            
+            // 确保每个活动都有order字段
+            if (!isEditing && activity.order === undefined) {
+                activity.order = activities.length;
+            } else if (isEditing && activity.order === undefined) {
+                // 如果是编辑，保持原有的order
+                if (editingIndex >= 0 && editingIndex < activities.length) {
+                    activity.order = activities[editingIndex].order || editingIndex;
+                } else {
+                    activity.order = activities.length;
+                }
             }
             
             if (isEditing) {
@@ -1182,6 +1296,29 @@
             }
         }
         
+        // 移动活动顺序
+        function moveActivity(index, direction) {
+            if ((direction === -1 && index === 0) || 
+                (direction === 1 && index === activities.length - 1)) {
+                return; // 已经在边界，无法移动
+            }
+            
+            const newIndex = index + direction;
+            
+            // 交换两个元素
+            const temp = activities[index];
+            activities[index] = activities[newIndex];
+            activities[newIndex] = temp;
+            
+            // 更新order字段
+            activities.forEach((activity, i) => {
+                activity.order = i;
+            });
+            
+            renderActivitiesTable();
+            addDebugLog(`活动已${direction === -1 ? '上移' : '下移'}`, 'success');
+        }
+        
         // 切换活动状态
         function toggleActivity(index) {
             if (index >= 0 && index < activities.length) {
@@ -1197,6 +1334,12 @@
                 if (index >= 0 && index < activities.length) {
                     const activity = activities[index];
                     activities.splice(index, 1);
+                    
+                    // 重新排序
+                    activities.forEach((activity, i) => {
+                        activity.order = i;
+                    });
+                    
                     renderActivitiesTable();
                     showMessage('成功', `活动"${activity.platform}"已删除`);
                 }
@@ -1405,6 +1548,7 @@
         window.editActivity = editActivity;
         window.toggleActivity = toggleActivity;
         window.deleteActivity = deleteActivity;
+        window.moveActivity = moveActivity;
         window.clearDebugInfo = clearDebugInfo;
     </script>
 </body>
