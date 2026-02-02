@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- 标题将通过JavaScript动态设置 -->
     <title>活动详情 - 春节马年活动导航</title>
     <!-- 安全相关meta标签 -->
     <meta name="referrer" content="no-referrer">
@@ -608,6 +609,11 @@
         let activityId = null;
         let isWeChat = false;
         
+        // 设置页面标题
+        function setPageTitle(title) {
+            document.title = title + ' - 活动详情';
+        }
+        
         // 初始化页面
         document.addEventListener('DOMContentLoaded', async function() {
             activityId = getUrlParam('id');
@@ -683,7 +689,8 @@
                 
             } catch (error) {
                 console.error('加载活动数据失败:', error);
-                showError(error.message || '加载活动数据失败');
+                // 这里不直接设置标题，会在showError中设置
+                throw error;
             }
         }
         
@@ -693,6 +700,9 @@
                 showError('活动数据为空');
                 return;
             }
+            
+            // 设置页面标题
+            setPageTitle(activityData.activityTitle);
             
             const app = document.getElementById('app');
             
@@ -837,6 +847,9 @@
         
         // 显示错误
         function showError(message) {
+            // 设置错误页面标题
+            setPageTitle('活动加载失败');
+            
             const app = document.getElementById('app');
             app.innerHTML = `
                 <header>
